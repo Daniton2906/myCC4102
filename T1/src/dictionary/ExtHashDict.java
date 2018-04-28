@@ -1,12 +1,8 @@
 package dictionary;
 
-public class BTreeDict implements Dictionary {
+public class ExtHashDict implements Dictionary {
 
-    private class BTreeNode {
-
-    }
-
-    public BTreeDict() {
+    public ExtHashDict() {
 
     }
 
