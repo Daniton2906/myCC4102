@@ -6,7 +6,6 @@ import java.util.ArrayList;
 public class DNA {
 
     private ArrayList<Character> myChain = new ArrayList<>();
-    private char[] allowedBases = {'G', 'C', 'A', 'T'};
 
     DNA(ArrayList<Character> chain) throws InvalidAttributeValueException {
         if (chain.size() != 15)
@@ -20,5 +19,15 @@ public class DNA {
 
     public ArrayList<Character> getChain() {
         return myChain;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("ADN { ");
+        for (char b : myChain) {
+            sb.append(b + " ");
+        }
+        sb.append("}");
+        return sb.toString();
     }
 }
