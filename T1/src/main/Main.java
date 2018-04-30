@@ -20,12 +20,13 @@ public class Main {
         System.out.println("Tiempo para crear " + CHAINS + " cadenas: " + (end - start));
         File fd = new File(btree_filename);
         try {
+            ByteArrayOutputStream byte_out = new ByteArrayOutputStream();
             ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fd));
-            for (int i = 0; i < 5; i++) {
-                out.writeObject(dna_array.get(i));
+            for (int i = 0; i < 1; i++) {
                 System.out.println(dna_array.get(i));
+                out.writeObject(dna_array.get(i));
             }
-            out.close();
+            out.close();/*
             ObjectOutputStream os2 = new ObjectOutputStream(
                     new FileOutputStream(fd, true)) {
                         protected void writeStreamHeader() throws IOException {
@@ -37,7 +38,7 @@ public class Main {
                 os2.writeObject(mydna);
                 System.out.println(mydna);
             }
-            os2.close();
+            os2.close();*/
             System.out.println("Serialized data is saved in " + btree_filename);
         } catch (IOException i) {
             i.printStackTrace();
@@ -50,11 +51,11 @@ public class Main {
             while(true) {
                 try{
                     dna = (DNA) in.readObject();
+                    System.out.println(dna);
                 }
                 catch(EOFException e) {
                     break;
                 }
-                System.out.println(dna);
             }
             in.close();
             fileIn.close();
