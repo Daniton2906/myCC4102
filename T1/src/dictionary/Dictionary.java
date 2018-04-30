@@ -1,12 +1,14 @@
 package dictionary;
 
+import utils.DNA;
+
 public interface Dictionary {
 
-    void put(String key, long value);
+    void put(DNA key, long value);
 
-    long get(String key);
+    long get(DNA key);
 
-    void delete(String key);
+    void delete(DNA key);
 
-    boolean containsKey(String key);
+    boolean containsKey(DNA key);
 }

@@ -1,22 +1,22 @@
 package dictionary;
 
+import utils.DNA;
+
 public class LinealHashDict implements Dictionary {
 
     public LinealHashDict() {
 
     }
 
+    public void put(DNA key, long value) {}
 
-
-    public void put(String key, long value) {}
-
-    public long get(String key) {
+    public long get(DNA key) {
         return 0;
     }
 
-    public void delete(String key){}
+    public void delete(DNA key){}
 
-    public boolean containsKey(String key){
+    public boolean containsKey(DNA key){
         return false;
     }
 }

@@ -1,9 +1,10 @@
 package utils;
 
 import javax.management.InvalidAttributeValueException;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class DNA {
+public class DNA implements Serializable{
 
     private ArrayList<Character> myChain = new ArrayList<>();
 

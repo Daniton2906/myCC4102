@@ -2,7 +2,6 @@ package utils;
 
 import javax.management.InvalidAttributeValueException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Random;
 
 public class DataGenerator {
