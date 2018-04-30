@@ -11,10 +11,12 @@ public class FileManager {
 
     private int B;
     private File fd;
+    private int counter = 0;
 
     public FileManager(int B, File fd) {
         this.B = B;
         this.fd = fd;
+        this.counter = 0;
     }
 
     public int logB(double x) {
@@ -23,7 +25,63 @@ public class FileManager {
         return (int) (num/den);
     }
 
-    public ArrayList<DNA> read(int block_offset) {
+    public ArrayList<Tuple2<Integer, DNA>> read_node(int block_offset) {
+        ArrayList<Tuple2<Integer, DNA>> tuple_array = new ArrayList<>();
+        Tuple2<Integer, DNA> tuple = null;
+        try {
+            FileInputStream fileIn = new FileInputStream(this.fd);
+            int nRead = 0;
+
+            // Get Block size
+            byte[] bs = new byte[4];
+            if((nRead = fileIn.read(bs, block_offset * (B + 1) * 4, 4)) == -1){
+                return null;
+            }
+            int block_size = 4 * ByteBuffer.wrap(bs).getInt();
+
+            // Get DNA values
+            byte[] blocks = new byte[block_size];
+            System.out.println(block_size);
+            if((nRead = fileIn.read(blocks, block_offset * (B + 1) * 4, block_size)) == -1) {
+                return null;
+            }
+            ByteBuffer bb = ByteBuffer.wrap(blocks);
+            for (int i = 0; i < block_size/2; i += 8) {
+                int bo = bb.getInt(i);
+                int codeNum = bb.getInt(i + 4);
+                tuple = new Tuple2<>(bo, new DNA(codeNum));
+                tuple_array.add(tuple);
+            }
+
+            fileIn.close();
+        } catch (IOException i) {
+            i.printStackTrace();
+        }
+        return tuple_array;
+    }
+
+    public boolean write_node(ArrayList<Tuple2<Integer, DNA>> tuple_array, int block_offset){
+        int block_size = tuple_array.size() * 2;
+        try {
+            FileOutputStream fileOut = new FileOutputStream(this.fd);
+            ByteBuffer dbuf = ByteBuffer.allocate(4 * (B + 1));
+            dbuf.putInt(block_size);
+            // Write all block
+            for (int i = 0; i < block_size; i++) {
+                dbuf.putInt(tuple_array.get(i).x);
+                dbuf.putInt(tuple_array.get(i).y.hashCode());
+            }
+            fileOut.write(dbuf.array(), block_offset * (B + 1) * 4, 4 * (B + 1));
+            fileOut.close();
+            System.out.println("Serialized data is saved in " + fd.getName());
+        } catch (IOException i) {
+            // i.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public ArrayList<DNA> read_block(int block_offset) {
         ArrayList<DNA> dna_array = new ArrayList<>();
         DNA dna = null;
         try {
@@ -57,7 +115,7 @@ public class FileManager {
         return dna_array;
     }
 
-    public boolean write(ArrayList<DNA> dna_array, int block_offset){
+    public boolean write_block(ArrayList<DNA> dna_array, int block_offset){
         int block_size = dna_array.size();
         try {
             FileOutputStream fileOut = new FileOutputStream(this.fd);
@@ -77,14 +135,29 @@ public class FileManager {
         return true;
     }
 
+    public boolean append_block(ArrayList<DNA> dna_array) {
+        boolean bool = write_block(dna_array, counter);
+        if (bool)
+            counter++;
+        return bool;
+    }
+
+    public int append_node(ArrayList<Tuple2<Integer, DNA>> tuple_array) {
+        if (write_node(tuple_array, counter)){
+            counter++;
+            return counter - 1;
+        } else
+            return -1;
+    }
+
     public void test(ArrayList<DNA> dna_array) {
 
         ArrayList<DNA> L = new ArrayList<>(dna_array.subList(0, 5));
         for(DNA dna: L)
             System.out.println(dna);
-        this.write(L, 0);
+        this.write_block(L, 0);
 
-        ArrayList<DNA> L2 = this.read(0);
+        ArrayList<DNA> L2 = this.read_block(0);
         for(DNA dna: L2)
             System.out.println(dna);
     }

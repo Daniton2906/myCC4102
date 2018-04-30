@@ -62,7 +62,7 @@ public class DNA {
 
     @Override
     public int hashCode(){
-        return hashcode;
+        return this.hashcode;
     }
 
     @Override
