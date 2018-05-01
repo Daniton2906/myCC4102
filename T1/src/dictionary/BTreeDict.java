@@ -11,35 +11,44 @@ public class BTreeDict implements Dictionary {
 
     private class BTreeNode{
 
-        private DNA key;
         private int offset;
         private final int B;
-        private ArrayList<Tuple2<Integer, DNA>> values;
+        private int block_size;
+        private ArrayList<Integer> pointers;
+        private ArrayList<DNA> keys;
 
-        BTreeNode(DNA key, int b, int offset) {
+        BTreeNode(int b, int offset) {
             super();
-            this.key = key;
             this.B = b;
             this.offset = offset;
-            this.values = fm.read_node(offset);
+            ArrayList<Integer> values = fm.read(offset);
+            this.block_size = values.get(0);
+            for(int i = 0; i < this.block_size; i++){
+                if(i % 2 == 0)
+                    this.pointers.add(values.get(i));
+                else
+                    this.keys.add(new DNA(values.get(i)));
+            }
         }
 
-        public ArrayList<Tuple2<Integer, DNA>> getValues() {
-            return this.values;
+        public ArrayList<Integer> getPointers() {
+            return this.pointers;
+        }
+
+        public ArrayList<DNA> getKeys() {
+            return this.keys;
         }
 
     }
 
     private class BTreeLeaf {
 
-        private DNA key;
         private int offset;
         private final int B;
         private ArrayList<DNA> values;
 
-        BTreeLeaf(DNA key, int b, int offset) {
+        BTreeLeaf(int b, int offset) {
             super();
-            this.key = key;
             this.B = b;
             this.offset = offset;
             this.values = fm.read_block(offset);
@@ -67,34 +76,41 @@ public class BTreeDict implements Dictionary {
     public void put(DNA key, long value) {
         int actual_height = 0;
         int offset = offset_raiz;
-        while (this.height != actual_height)
+        while (actual_height != this.height)
         {
-            BTreeNode raiz = new BTreeNode(key, this.B, offset);
-            ArrayList<Tuple2<Integer, DNA>> dna_array = raiz.getValues();
+            BTreeNode node = new BTreeNode(this.B, offset);
+            ArrayList<DNA> dnas = node.getKeys();
             int i = 0;
-            while(i < dna_array.size()){
-                int cmp = key.compareTo(dna_array.get(i).y);
-                if(cmp == 0)
+            while(i < dnas.size()) {
+                int cmp = key.compareTo(dnas.get(i));
+                if(cmp <= 0)
                     break;
                 i++;
             }
+            offset = node.getPointers().get(i);
             actual_height++;
         }
 
-/*
-        if(this.height == 0) {
+        BTreeLeaf leaf = new BTreeLeaf(this.B, offset);
+        ArrayList<DNA> dnas = leaf.getValues();
+        int i = 0;
+        while(i < dnas.size()) {
+            int cmp = key.compareTo(dnas.get(i));
+            if (cmp < 0) {
+                dnas.add(i, key);
+                break;
+            }
+            i++;
+        }
 
-            if(i == dna_array.size())
+        // Overflow
+        if(dnas.size() > B){
 
-            //fm.write_node();
         }
         else
-            this.raiz.insert(key);*/
+            fm.write_block(dnas, offset);
 
-    }
 
-    public long get(DNA key) {
-        return 0;
     }
 
     public void delete(DNA key){}

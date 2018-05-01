@@ -33,14 +33,14 @@ public class FileManager {
 
             // Get Block size
             byte[] bs = new byte[4];
-            if((nRead = fileIn.read(bs, block_offset * (B + 1) * 4, 4)) == -1){
+            if((nRead = fileIn.read(bs, block_offset * B * 4, 4)) == -1){
                 return null;
             }
             int block_size = 4 * ByteBuffer.wrap(bs).getInt();
 
             // Get DNA values
             byte[] blocks = new byte[block_size];
-            if((nRead = fileIn.read(blocks, block_offset * (B + 1) * 4, block_size)) == -1) {
+            if((nRead = fileIn.read(blocks, block_offset * B * 4, block_size)) == -1) {
                 return null;
             }
             ByteBuffer bb = ByteBuffer.wrap(blocks);
@@ -61,11 +61,11 @@ public class FileManager {
             FileOutputStream fileOut = new FileOutputStream(this.fd);
             ByteBuffer dbuf = ByteBuffer.allocate(32);
             dbuf.putInt(0, block_size);
-            fileOut.write(dbuf.array(), block_offset * (B + 1) * 4, 4);
+            fileOut.write(dbuf.array(), block_offset * B  * 4, 4);
             // Write all block
             for (int i = 0; i < block_size; i++) {
                 dbuf.putInt(0, int_array.get(i));
-                fileOut.write(dbuf.array(), block_offset * (B + 1) * 4, 4);
+                fileOut.write(dbuf.array(), block_offset * B * 4, 4);
             }
             fileOut.close();
             System.out.println("Serialized data is saved in " + fd.getName());
@@ -92,7 +92,7 @@ public class FileManager {
 
             // Get Block size
             byte[] bs = new byte[4];
-            if((nRead = fileIn.read(bs, block_offset * (B + 1) * 4, 4)) == -1){
+            if((nRead = fileIn.read(bs, block_offset * B * 4, 4)) == -1){
                 return null;
             }
             int block_size = 4 * ByteBuffer.wrap(bs).getInt();
@@ -100,7 +100,7 @@ public class FileManager {
             // Get DNA values
             byte[] blocks = new byte[block_size];
             System.out.println(block_size);
-            if((nRead = fileIn.read(blocks, block_offset * (B + 1) * 4, block_size)) == -1) {
+            if((nRead = fileIn.read(blocks, block_offset * B * 4, block_size)) == -1) {
                 return null;
             }
             ByteBuffer bb = ByteBuffer.wrap(blocks);
@@ -122,14 +122,14 @@ public class FileManager {
         int block_size = tuple_array.size() * 2;
         try {
             FileOutputStream fileOut = new FileOutputStream(this.fd);
-            ByteBuffer dbuf = ByteBuffer.allocate(4 * (B + 1));
+            ByteBuffer dbuf = ByteBuffer.allocate(4 * B);
             dbuf.putInt(block_size);
             // Write all block
             for (int i = 0; i < block_size; i++) {
                 dbuf.putInt(tuple_array.get(i).x);
                 dbuf.putInt(tuple_array.get(i).y.hashCode());
             }
-            fileOut.write(dbuf.array(), block_offset * (B + 1) * 4, 4 * (B + 1));
+            fileOut.write(dbuf.array(), block_offset * B * 4, 4 * B);
             fileOut.close();
             System.out.println("Serialized data is saved in " + fd.getName());
         } catch (IOException i) {
@@ -148,7 +148,7 @@ public class FileManager {
 
             // Get Block size
             byte[] bs = new byte[4];
-            if((nRead = fileIn.read(bs, block_offset*(B + 1) * 4, 4)) == -1){
+            if((nRead = fileIn.read(bs, block_offset* B * 4, 4)) == -1){
                 return null;
             }
             int block_size = 4 * ByteBuffer.wrap(bs).getInt();
@@ -156,7 +156,7 @@ public class FileManager {
             // Get DNA values
             byte[] blocks = new byte[block_size];
             System.out.println(block_size);
-            if((nRead = fileIn.read(blocks, block_offset*(B + 1) * 4, block_size)) == -1) {
+            if((nRead = fileIn.read(blocks, block_offset* B * 4, block_size)) == -1) {
                 return null;
             }
             ByteBuffer bb = ByteBuffer.wrap(blocks);
@@ -177,13 +177,13 @@ public class FileManager {
         int block_size = dna_array.size();
         try {
             FileOutputStream fileOut = new FileOutputStream(this.fd);
-            ByteBuffer dbuf = ByteBuffer.allocate(4 * (B + 1));
+            ByteBuffer dbuf = ByteBuffer.allocate(4 * B);
             dbuf.putInt(block_size);
             // Write all block
             for (int i = 0; i < block_size; i++) {
                 dbuf.putInt(dna_array.get(i).hashCode());
             }
-            fileOut.write(dbuf.array(), block_offset * (B + 1) * 4, 4 * (B + 1));
+            fileOut.write(dbuf.array(), block_offset * B * 4, 4 * B);
             fileOut.close();
             System.out.println("Serialized data is saved in " + fd.getName());
         } catch (IOException i) {

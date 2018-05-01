@@ -23,7 +23,7 @@ public class Main {
         System.out.println("Tiempo para crear " + CHAINS + " cadenas: " + (end - start));
 
         File fd = new File(btree_filename);
-        FileManager fm = new FileManager(B, fd);
+        FileManager fm = new FileManager(B + 1, fd);
         fm.test(dna_array);
     }
 }
