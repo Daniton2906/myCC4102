@@ -17,12 +17,11 @@ public class BTreeDict implements Dictionary {
         private ArrayList<Integer> pointers;
         private ArrayList<DNA> keys;
 
-        BTreeNode(int b, int offset) {
+        BTreeNode(int b, int offset, ArrayList<Integer> values) {
             super();
             this.B = b;
             this.offset = offset;
-            ArrayList<Integer> values = fm.read(offset);
-            this.block_size = values.get(0);
+            this.block_size = values.get(0) & 0xbfffffff;
             for(int i = 0; i < this.block_size; i++){
                 if(i % 2 == 0)
                     this.pointers.add(values.get(i));
@@ -51,7 +50,7 @@ public class BTreeDict implements Dictionary {
             super();
             this.B = b;
             this.offset = offset;
-            this.values = fm.read_block(offset);
+            //this.values = fm.read(offset);
         }
 
         public ArrayList<DNA> getValues() {
@@ -76,9 +75,11 @@ public class BTreeDict implements Dictionary {
     public void put(DNA key, long value) {
         int actual_height = 0;
         int offset = offset_raiz;
-        while (actual_height != this.height)
+        ArrayList<Integer> values = fm.read(offset);
+        int isLeaf = (values.get(0) >> 31) & 0x1;
+        while (isLeaf != 0)
         {
-            BTreeNode node = new BTreeNode(this.B, offset);
+            BTreeNode node = new BTreeNode(this.B, offset, values);
             ArrayList<DNA> dnas = node.getKeys();
             int i = 0;
             while(i < dnas.size()) {
@@ -107,8 +108,8 @@ public class BTreeDict implements Dictionary {
         if(dnas.size() > B){
 
         }
-        else
-            fm.write_block(dnas, offset);
+        else;
+            //fm.write_block(dnas, offset);
 
 
     }

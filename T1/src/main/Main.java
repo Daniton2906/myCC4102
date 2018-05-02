@@ -24,6 +24,6 @@ public class Main {
 
         File fd = new File(btree_filename);
         FileManager fm = new FileManager(B + 1, fd);
-        fm.test(dna_array);
+        fm.test(dna_array, 10); //(int) Math.pow(2, 20));
     }
 }
