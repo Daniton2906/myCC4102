@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class LinealHashDict implements Dictionary {
 
     // tamano bloque = 4KB o 512B
-    private int B, t, p;
+    private int B, t, p, last;
     private final FileManager fm;
 
     // Idea: utilizar dos bloques para guardar referencias a bloques, uno mantiene referencia a bloques de memoria
@@ -18,18 +18,25 @@ public class LinealHashDict implements Dictionary {
     //       utilizados pero actualmente estan vacios.
 
     public LinealHashDict(String filename, int B) {
+        // caso en que se usa un hashing lineal ya creado(?).
+
+
+        // caso en que se crea un hashing lineal.
         this.fm = new FileManager(B, new File(filename));
         this.B = B;
         this.t = 0;
         this.p = 1;
+        this.last = 3;
 
+        // referencias en bloque de desuso.
         ArrayList<Integer> id = new ArrayList<Integer>();
         id.add(0);
         this.fm.write(id, 1);
 
+        // referencias en bloque de usos.
         id = new ArrayList<Integer>();
         id.add(1); id.add(2);
-        this.fm.write(id, 1);
+        this.fm.write(id, 0);
     }
 
     private void expand() {
@@ -43,7 +50,8 @@ public class LinealHashDict implements Dictionary {
             // actualizar cantidad de bloques en desuso.
             // reescribir bloque de referencias.
         } else {
-            ref_expand = this.p + 2;
+            ref_expand = this.last;
+            this.last++;
         }
 
         // ref_expand tiene indice de bloque vacio.
@@ -58,132 +66,168 @@ public class LinealHashDict implements Dictionary {
         if(p == (2 << (t+1))) {
             t++;
         }
-
     }
 
     private void compress() {}
 
     public void put(DNA key, long value) {
         // primer numero en el bloque 0 es la cantidad de referencias.
-        int page = 1 + key.hashCode() % p;
+        int page = 1 + key.hashCode() % (1 << (t+1));
+        if(this.p < page)
+            page = 1 + key.hashCode() % (1 << t);
 
         // obtener bloque con referencias
-        ArrayList<Integer> reference = this.fm.read(0);
+        ArrayList<Integer> reference_block = this.fm.read(0);
 
-        /*
-        int cant_active_block = reference.get(0);
+        // obtener cantidad de bloques activos.
+        int cant_active_block = reference_block.get(0);
+
         // si la pagina que se busca sale del arreglo de referencias que se obtuvieron,
         // empezar a buscar en la siguiente pagina de referencias.
         while(cant_active_block < page) {
             page -= cant_active_block;
-            reference = this.fm.read(reference.get(cant_active_block + 2));
-            cant_active_block = reference.get(0);
+            reference_block = this.fm.read(reference_block.get(B-1));
+            cant_active_block = reference_block.get(0);
         }
-        */
-        int reference_page = reference.get(page);
 
-        ArrayList<Integer> content = this.fm.read(reference_page);
+        int reference_page = reference_block.get(page);
+        ArrayList<Integer> page_content = this.fm.read(reference_page);
 
-        /*
         // colocar caso en que la pagina ya esta llena, por lo que es necesario buscar en el siguiente bloque.
         // un bloque contiene los elementos, un numero (cantidad de elementos) y una referencia.
-        long long cant_elements = content.get(0).hashcode();
+        int cant_elements = page_content.get(0);
         while(cant_elements == B - 2) {
-            int next_block = content.get(B-1);
-            content = this.fm.read_block(next_block);
-            cant_elements = content.size();
+            reference_page = page_content.get(B-1);
+            page_content = this.fm.read(reference_page);
+            cant_elements = page_content.get(0);
         }
-         */
 
-        content.add(key.hashCode());
-        this.fm.write(content, reference_page);
+        // adicion de la nueva cadena.
+        page_content.add(key.hashCode());
+        ArrayList<Integer> new_content = new ArrayList<Integer>();
+        new_content.add(page_content.get(0) + 1);
+
+        for(int i=1; i<page_content.size(); i++)
+            new_content.add(page_content.get(i));
+
+        if(new_content.get(0) == B - 2) {
+            new_content.add(this.last);
+            this.last++;
+        }
+
+        this.fm.write(new_content, reference_page);
 
         /*
         // caso en que se cumple condicion de expansion.
         if(CONDICION){
             expand()
         }
-         */
-
+        */
     }
 
     public void delete(DNA key){
         // primer numero en el bloque 0 es la cantidad de referencias.
-        int page = 1 + key.hashCode() % p;
+        int page = 1 + key.hashCode() % (1 << (t+1));
+        if(this.p < page)
+            page = 1 + key.hashCode() % (1 << t);
 
         // obtener bloque con referencias
-        ArrayList<Integer> reference = this.fm.read(0);
+        ArrayList<Integer> reference_block = this.fm.read(0);
 
-        /*
-        int cant_active_block = reference.get(0);
+        // obtener cantidad de bloques activos.
+        int cant_active_block = reference_block.get(0);
+
         // si la pagina que se busca sale del arreglo de referencias que se obtuvieron,
         // empezar a buscar en la siguiente pagina de referencias.
         while(cant_active_block < page) {
             page -= cant_active_block;
-            reference = this.fm.read(reference.get(cant_active_block + 2));
-            cant_active_block = reference.get(0);
+            reference_block = this.fm.read(reference_block.get(B-1));
+            cant_active_block = reference_block.get(0);
         }
-        */
-        int reference_page = reference.get(page);
 
-        ArrayList<Integer> content = this.fm.read(reference_page);
+        // obtencion referencia a pagina y pagina objetivo.
+        int reference_page = reference_block.get(page);
+        ArrayList<Integer> page_content = this.fm.read(reference_page);
 
-        /*
-        // TODO: while de busqueda y borrado, junto con compresion de lista enlazada.
+        // colocar caso en que la pagina ya esta llena, por lo que es necesario buscar en el siguiente bloque.
+        // un bloque contiene los elementos, un numero (cantidad de elementos) y una referencia.
+        int cant_elements = page_content.get(0);
+        boolean res = false;
+        while(true) {
+            for(int i=1; i<=cant_elements; i++) {
+                if(key.hashCode() == page_content.get(i)) {
+                    res = true;
+                }
+            }
+
+            if(res)
+                break;
+            if(cant_elements < B - 2)
+                break;
+
+            reference_page = page_content.get(B-1);
+            page_content = this.fm.read(reference_page);
+            cant_elements = page_content.get(0);
         }
-         */
-        this.fm.write(content, reference_page);
+
+        if(res) {
+            // buscar ultimo elmento de la lista enlazada.
+        }
 
         /*
         // caso en que se cumple condicion de compresion.
         if(CONDICION){
-            compress();
+            compress()
         }
         */
     }
 
     public boolean containsKey(DNA key){
         // primer numero en el bloque 0 es la cantidad de referencias.
-        int page = 1 + key.hashCode() % p;
+        int page = 1 + key.hashCode() % (1 << (t+1));
+        if(this.p < page)
+            page = 1 + key.hashCode() % (1 << t);
 
         // obtener bloque con referencias
-        ArrayList<Integer> reference = this.fm.read(0);
+        ArrayList<Integer> reference_block = this.fm.read(0);
 
-        /*
-        int cant_active_block = reference.get(0);
+        // obtener cantidad de bloques activos.
+        int cant_active_block = reference_block.get(0);
+
         // si la pagina que se busca sale del arreglo de referencias que se obtuvieron,
         // empezar a buscar en la siguiente pagina de referencias.
         while(cant_active_block < page) {
             page -= cant_active_block;
-            reference = this.fm.read(reference.get(cant_active_block + 2));
-            cant_active_block = reference.get(0);
+            reference_block = this.fm.read(reference_block.get(B-1));
+            cant_active_block = reference_block.get(0);
         }
-        */
-        int reference_page = reference.get(page);
 
-        ArrayList<Integer> content = this.fm.read(reference_page);
+        // obtencion de referencia y contenido de la pagina buscada.
+        int reference_page = reference_block.get(page);
+        ArrayList<Integer> page_content = this.fm.read(reference_page);
+
         boolean res = false;
+        int cant_elements = page_content.get(0);
 
-        /*
         // colocar caso en que la pagina ya esta llena, por lo que es necesario buscar en el siguiente bloque.
         // un bloque contiene los elementos, un numero (cantidad de elementos) y una referencia.
-        long long cant_elements = content.get(0).hashcode();
+
         while(true) {
-            for(int i=1; i<content.size() - 1; i++) {
-                if(content.get(i).hashcode() == key.hashcode()) {
+            for(int i=1; i<=cant_elements; i++) {
+                if(page_content.get(i) == key.hashCode())
                     res = true;
-                }
             }
 
-            if(cant_elements != B - 2 || res) {
+            if(res)
                 break;
-            }
 
-            int next_block = content.get(B-1);
-            content = this.fm.read_block(next_block);
-            cant_elements = content.size();
+            if(cant_elements < B - 2)
+                break;
+
+            reference_page = page_content.get(B-1);
+            page_content = this.fm.read(reference_page);
+            cant_elements = page_content.get(0);
         }
-         */
 
         return res;
     }
