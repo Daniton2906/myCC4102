@@ -82,7 +82,7 @@ public class LinealHashDict implements Dictionary {
         */
         int reference_page = reference.get(page);
 
-        ArrayList<DNA> content = this.fm.read_block(reference_page);
+        ArrayList<Integer> content = this.fm.read(reference_page);
 
         /*
         // colocar caso en que la pagina ya esta llena, por lo que es necesario buscar en el siguiente bloque.
@@ -95,8 +95,8 @@ public class LinealHashDict implements Dictionary {
         }
          */
 
-        content.add(key);
-        this.fm.write_block(content, reference_page);
+        content.add(key.hashCode());
+        this.fm.write(content, reference_page);
 
         /*
         // caso en que se cumple condicion de expansion.
@@ -126,13 +126,13 @@ public class LinealHashDict implements Dictionary {
         */
         int reference_page = reference.get(page);
 
-        ArrayList<DNA> content = this.fm.read_block(reference_page);
+        ArrayList<Integer> content = this.fm.read(reference_page);
 
         /*
         // TODO: while de busqueda y borrado, junto con compresion de lista enlazada.
         }
          */
-        this.fm.write_block(content, reference_page);
+        this.fm.write(content, reference_page);
 
         /*
         // caso en que se cumple condicion de compresion.
@@ -161,7 +161,7 @@ public class LinealHashDict implements Dictionary {
         */
         int reference_page = reference.get(page);
 
-        ArrayList<DNA> content = this.fm.read_block(reference_page);
+        ArrayList<Integer> content = this.fm.read(reference_page);
         boolean res = false;
 
         /*
