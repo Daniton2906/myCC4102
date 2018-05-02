@@ -13,9 +13,19 @@ public class FileManager {
     private File fd;
     private int counter = 0;
 
-    public FileManager(int B, File fd) {
+    public FileManager(int B, File fd){
         this.B = B;
-        this.fd = fd;
+        try {
+            if(fd.getParentFile().mkdirs())
+                if(fd.createNewFile())
+                    this.fd = fd;
+                else
+                    throw new IOException();
+        }
+        catch(IOException e){
+            System.err.println("Error desconocidooooooo");
+            this.fd = null;
+        }
         this.counter = 0;
     }
 

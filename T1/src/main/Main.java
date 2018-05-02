@@ -22,8 +22,9 @@ public class Main {
         long end = System.currentTimeMillis();
         System.out.println("Tiempo para crear " + CHAINS + " cadenas: " + (end - start));
 
-        File fd = new File(btree_filename);
+        File fd = new File(System.getProperty("user.dir") + btree_filename);
         FileManager fm = new FileManager(B + 1, fd);
+        System.out.println(System.getProperty("user.dir") + btree_filename);
         fm.test(dna_array, 10); //(int) Math.pow(2, 20));
     }
 }
