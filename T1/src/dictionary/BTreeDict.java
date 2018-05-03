@@ -2,11 +2,9 @@ package dictionary;
 
 import utils.DNA;
 import utils.FileManager;
-import utils.Tuple2;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
 public class BTreeDict implements Dictionary {
 
@@ -85,10 +83,16 @@ public class BTreeDict implements Dictionary {
         this.fm = new FileManager(B, new File(filename));
         this.B = B;
         this.height = 0;
-        this.offset_raiz = 0;
+        this.offset_raiz = -1;
     }
 
     public void put(DNA key, long value) {
+        if(this.offset_raiz == -1) {
+            ArrayList<Integer> first_leaf = new ArrayList<>();
+            first_leaf.add(key.hashCode());
+            this.offset_raiz = fm.append(first_leaf);
+            return;
+        }
         int offset = offset_raiz;
         ArrayList<Integer> values = fm.read(offset);
         int isLeaf = (values.get(0) >> 31) & 0x1;
@@ -130,9 +134,9 @@ public class BTreeDict implements Dictionary {
             ArrayList<Integer> new_leaf2 = new ArrayList<>();
             // dividir segun mediana
             for (int j = 0; j < dnas.size(); j++) {
-                if(i < m)
+                if(j <= m)
                     new_leaf1.add(dnas.get(j).hashCode());
-                else if (i > m)
+                else if (j > m)
                     new_leaf2.add(dnas.get(j).hashCode());
             }
             int new_offset1 = offset;
