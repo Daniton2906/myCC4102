@@ -1,11 +1,15 @@
 package main;
 
+import dictionary.BTreeDict;
+import dictionary.Dictionary;
 import utils.DNA;
 import utils.DataGenerator;
 import utils.FileManager;
+import utils.Tester;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class Main {
 
@@ -22,9 +26,14 @@ public class Main {
         long end = System.currentTimeMillis();
         System.out.println("Tiempo para crear " + CHAINS + " cadenas: " + (end - start));
 
-        File fd = new File(System.getProperty("user.dir") + btree_filename);
-        FileManager fm = new FileManager(B + 1, fd);
-        System.out.println(fd.getAbsolutePath());
-        fm.test(dna_array, 10); //(int) Math.pow(2, 20));
+        String pathname = System.getProperty("user.dir") + btree_filename;
+        File fd = new File(pathname);
+        FileManager fm = new FileManager(B, fd);
+        Dictionary btree = new BTreeDict(pathname, B);
+        //System.out.println(fd.getAbsolutePath());
+        Tester.test0(fm, dna_array, 0, B, 0);
+        Tester.test0(fm, dna_array, B, 3*B/2, 1);
+        Tester.test0(fm, dna_array, 2*B, 3*B, 2);
+
     }
 }
