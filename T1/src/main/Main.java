@@ -11,7 +11,7 @@ public class Main {
 
     static final private long CHAINS = (long) Math.pow(2, 20);
     static final private int B = 10;
-    static final private String btree_filename = "T1/tmp/btree_data.ser";
+    static final private String btree_filename = "/T1/tmp/btree_data.ser";
 
     public static void main (String [ ] args) {
         System.out.println("Empezamos la ejecución del programa");

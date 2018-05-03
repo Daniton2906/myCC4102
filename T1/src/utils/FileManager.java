@@ -96,15 +96,17 @@ public class FileManager {
         return true;
     }
 
-    public boolean append(ArrayList<Integer> int_array) {
+    public int append(ArrayList<Integer> int_array) {
         return append(int_array, false);
     }
 
-    public boolean append(ArrayList<Integer> int_array, boolean lastBit) {
+    public int append(ArrayList<Integer> int_array, boolean lastBit) {
         boolean bool = write(int_array, counter, lastBit);
         if (bool)
             counter++;
-        return bool;
+        else
+            return -1;
+        return counter-1;
     }
 
     public void test(ArrayList<DNA> dna_array, int to) {
