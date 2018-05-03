@@ -33,7 +33,7 @@ public class LinealHashDict implements Dictionary {
         id.add(0);
         this.fm.write(id, 1);
 
-        // referencias en bloque de usos.
+        // referencias en bloque de uso.
         id = new ArrayList<Integer>();
         id.add(1); id.add(2);
         this.fm.write(id, 0);
@@ -111,6 +111,10 @@ public class LinealHashDict implements Dictionary {
             new_content.add(page_content.get(i));
 
         if(new_content.get(0) == B - 2) {
+            ArrayList<Integer> last = new ArrayList<Integer>();
+            last.add(0);
+            this.fm.write(last, this.last);
+
             new_content.add(this.last);
             this.last++;
         }
@@ -170,8 +174,42 @@ public class LinealHashDict implements Dictionary {
             cant_elements = page_content.get(0);
         }
 
+        // si res == true, se encontro una cadena dada key.
+        // page_content tiene la cadena que se estaba buscando.
+        // reference_page es la referencia al bloque donde esta la cadena buscada.
         if(res) {
-            // buscar ultimo elmento de la lista enlazada.
+            // se busca el ultimo bloque no vacio de la lista de bloques.
+            int last_reference_page = reference_page;
+            int change_chain = 0;
+            ArrayList<Integer> last_page_content = this.fm.read(last_reference_page);
+
+            while(true) {
+                int cant_last_page = last_page_content.get(0);
+                ArrayList<Integer> change_page = new ArrayList<Integer>();
+                if (0 < cant_last_page && cant_last_page < B - 2) {
+                    // cambio por ultima cadena
+                    break;
+                }
+
+                int next_reference = last_page_content.get(B-1);
+                ArrayList<Integer> next_page_content = this.fm.read(next_reference);
+
+                if(next_page_content.get(0) == 0) {
+                    // cambio por ultima cadena
+                    break;
+                }
+
+                last_reference_page = next_reference;
+                last_page_content = next_page_content;
+
+            }
+
+            if(last_page_content.get(0) == B - 2) {
+                // dejar la siguiente pagina como pagina en desuso.
+                // agregar last_reference_page a bloque de referencia de paginas en desuso.
+                // con un for copiar last_page_content.
+            }
+
         }
 
         /*
