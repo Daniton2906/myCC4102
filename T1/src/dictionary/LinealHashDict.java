@@ -206,10 +206,12 @@ public class LinealHashDict implements Dictionary {
         // colocar caso en que la pagina ya esta llena, por lo que es necesario buscar en el siguiente bloque.
         // un bloque contiene los elementos, un numero (cantidad de elementos) y (posiblemente) una referencia.
         int cant_elements = page_content.get(0);
-        boolean res = false;
+        boolean res = false, same_block = true;
+        int pos_chain_to_delete = 0;
         while(true) {
             for(int i=1; i<=cant_elements; i++) {
                 if(key.hashCode() == page_content.get(i)) {
+                    pos_chain_to_delete = i;
                     res = true;
                 }
             }
@@ -228,6 +230,8 @@ public class LinealHashDict implements Dictionary {
          si res == true, se encontro la cadena 'key'.
          page_content: bloque/pagina que contiene la cadena que se estaba buscando.
          reference_page: referencia al bloque donde esta la cadena buscada.
+
+         falta evitar caso en que la ultima cadena es la cadena que se intenta borrar.
         */
         if(res) {
             // se busca el ultimo bloque no vacio de la lista de bloques.
@@ -247,6 +251,10 @@ public class LinealHashDict implements Dictionary {
                         change_page.add(last_page_content.get(i));
 
                     this.fm.write(change_page, last_reference_page);
+
+                    if(cant_last_page == pos_chain_to_delete)
+                        same_block = false;
+
                     break;
                 }
 
@@ -263,7 +271,13 @@ public class LinealHashDict implements Dictionary {
                     for(int i=1; i<cant_last_page; i++)
                         change_page.add(last_page_content.get(i));
 
+                    this.addReference(1, last_page_content.get(B-1));
+
                     this.fm.write(change_page, last_reference_page);
+
+                    if(cant_last_page == pos_chain_to_delete)
+                        same_block = false;
+
                     break;
                 }
 
@@ -272,11 +286,25 @@ public class LinealHashDict implements Dictionary {
 
             }
 
-            if(last_page_content.get(0) == B - 2) {
-                // dejar la siguiente pagina como pagina en desuso.
-                // agregar last_reference_page a bloque de referencia de paginas en desuso.
-                // con un for copiar last_page_content.
+            // last_chain: ultima cadena en la lista enlazada.
+            // en caso de que la cadena a eliminar no es la ultima de la lista enlazada, hacer el cambio.
+
+            ArrayList<Integer> new_content = new ArrayList<Integer>();
+
+            if(same_block) {
+                for(int i=1; i<=cant_elements; i++) {
+                    if(i == pos_chain_to_delete)
+                        new_content.add(last_chain);
+                    else
+                        new_content.add(page_content.get(i));
+                }
+            } else {
+                for(int i=1; i<cant_elements; i++) {
+                    new_content.add(page_content.get(i));
+                }
             }
+
+            this.fm.write(new_content, reference_page);
 
         }
 
