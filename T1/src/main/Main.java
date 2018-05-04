@@ -39,7 +39,16 @@ public class Main {
         //ArrayList<Integer> L = new ArrayList<>();
         //L.add(dna_array.get(5*B).hashCode());
         //fm.append(L);
-        for (DNA dna: dna_array.subList(0, 100))
+        int n = 10000;
+        System.out.println("Insertando " + n + " claves");
+        for (DNA dna: dna_array.subList(0, n))
             btree.put(dna, 0);
+        System.out.println("Buscando mismas claves insertadas");
+        int cnt = 0;
+        for (DNA dna: dna_array.subList(0, n))
+            if(btree.containsKey(dna))
+                cnt++;
+        System.out.println("Encontradas " + cnt + " claves");
+
     }
 }
