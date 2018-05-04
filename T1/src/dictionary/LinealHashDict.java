@@ -366,4 +366,10 @@ public class LinealHashDict implements Dictionary {
 
         return res;
     }
+
+    public void resetIOCounter(){}
+
+    public int getIOs(){return 0;}
+
+    public int getUsedSpace(){return 0;}
 }

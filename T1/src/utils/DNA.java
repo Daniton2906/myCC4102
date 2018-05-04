@@ -79,4 +79,9 @@ public class DNA {
     public int compareTo(DNA dna) {
         return Integer.compare(this.hashCode(), dna.hashCode());
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this.hashcode == obj.hashCode();
+    }
 }

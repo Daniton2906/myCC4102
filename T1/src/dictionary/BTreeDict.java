@@ -64,6 +64,21 @@ public class BTreeDict implements Dictionary {
             return true;
         }
 
+        private boolean delete(DNA key) {
+            int j = 0;
+            for (; j < this.keys.size(); j++) {
+                if (key.compareTo(this.keys.get(j)) == 0) {
+                    this.keys.remove(j);
+                    this.pointers.remove(j);
+                    return true;
+                }
+            } return false;
+        }
+
+        private BTreeNode join(BTreeNode other_node) {
+            return null;
+        }
+
     }
 
     private class BTreeLeaf {
@@ -105,11 +120,31 @@ public class BTreeDict implements Dictionary {
             return true;
         }
 
+        private boolean delete(DNA key) {
+            int j = 0;
+            for (; j < this.values.size(); j++) {
+                if (key.compareTo(this.values.get(j)) == 0) {
+                    this.values.remove(j);
+                    return true;
+                }
+            } return false;
+        }
+
         private ArrayList<Integer> getIntValues() {
             ArrayList<Integer> int_array = new ArrayList<>();
             for(int i = 0; i < this.block_size; i++)
                 int_array.add(this.values.get(i).hashCode());
             return int_array;
+        }
+
+        private BTreeLeaf join(BTreeLeaf other_leaf) {
+            ArrayList<Integer> new_leaf = new ArrayList<>();
+            for(DNA myDna: this.values)
+                new_leaf.add(myDna.hashCode());
+            for(DNA otherDna: other_leaf.getValues())
+                new_leaf.add(otherDna.hashCode());
+            new_leaf.add(0, new_leaf.size());
+            return new BTreeLeaf(this.B, this.offset, new_leaf);
         }
 
     }
@@ -290,7 +325,9 @@ public class BTreeDict implements Dictionary {
         }
     }
 
-    public void delete(DNA key){}
+    public void delete(DNA key){
+
+    }
 
     public boolean containsKey(DNA key){
         //si no hay ningun valor, solo se agrega un nuevo bloque hoja
@@ -334,4 +371,10 @@ public class BTreeDict implements Dictionary {
         } //Si se sale del loop, no se encontró la clave
         return false;
     }
+
+    public void resetIOCounter(){}
+
+    public int getIOs(){return 0;}
+
+    public int getUsedSpace(){return 0;}
 }
