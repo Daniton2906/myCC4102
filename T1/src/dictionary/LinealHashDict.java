@@ -178,7 +178,7 @@ public class LinealHashDict implements Dictionary {
         */
     }
 
-    // metodo para eliminar un elemento de un diccionario (incompleto).
+    // metodo para eliminar un elemento de un diccionario (posiblemente completo).
     public void delete(DNA key){
         // primer numero en el bloque 0 es la cantidad de referencias.
         int page = 1 + key.hashCode() % (1 << (t+1));
@@ -287,10 +287,10 @@ public class LinealHashDict implements Dictionary {
             }
 
             // last_chain: ultima cadena en la lista enlazada.
+            // page_content: bloque/pagina que contiene la cadena que se estaba buscando.
+            // reference_page: referencia al bloque donde esta la cadena buscada.
             // en caso de que la cadena a eliminar no es la ultima de la lista enlazada, hacer el cambio.
-
             ArrayList<Integer> new_content = new ArrayList<Integer>();
-
             if(same_block) {
                 for(int i=1; i<=cant_elements; i++) {
                     if(i == pos_chain_to_delete)
@@ -298,13 +298,11 @@ public class LinealHashDict implements Dictionary {
                     else
                         new_content.add(page_content.get(i));
                 }
-            } else {
-                for(int i=1; i<cant_elements; i++) {
-                    new_content.add(page_content.get(i));
-                }
+
+                this.fm.write(new_content, reference_page);
             }
 
-            this.fm.write(new_content, reference_page);
+            // en caso que no se cumpla if, ya se elimino el ultimo elemento dentro del while.
 
         }
 
