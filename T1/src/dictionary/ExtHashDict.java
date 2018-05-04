@@ -37,4 +37,10 @@ public class ExtHashDict implements Dictionary {
     public boolean containsKey(DNA key){
         return false;
     }
+
+    public void resetIOCounter(){}
+
+    public int getIOs(){return 0;}
+
+    public int getUsedSpace(){return 0;}
 }

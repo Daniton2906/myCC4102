@@ -9,4 +9,10 @@ public interface Dictionary {
     void delete(DNA key);
 
     boolean containsKey(DNA key);
+
+    void resetIOCounter();
+
+    int getIOs();
+
+    int getUsedSpace();
 }

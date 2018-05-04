@@ -27,28 +27,23 @@ public class Main {
         System.out.println("Tiempo para crear " + CHAINS + " cadenas: " + (end - start));
 
         String pathname = System.getProperty("user.dir") + btree_filename;
+
         File fd = new File(pathname);
+        //System.out.println(fd.getAbsolutePath());
         FileManager fm = new FileManager(B, fd);
         Dictionary btree = new BTreeDict(pathname, B);
-        //System.out.println(fd.getAbsolutePath());
-        //Tester.test0(fm, dna_array, 0, B, 0);
-        //Tester.test0(fm, dna_array, B, 3*B/2, 1);
-        //Tester.test0(fm, dna_array, 2*B, 3*B, 2);
-        //Tester.test0(fm, dna_array, 3*B, 7*B/2, 3);
-        //Tester.test0(fm, dna_array, 4*B, 5*B, 1);
-        //ArrayList<Integer> L = new ArrayList<>();
-        //L.add(dna_array.get(5*B).hashCode());
-        //fm.append(L);
+
+        /*Tester.test0(fm, dna_array, 0, B, 0);
+        Tester.test0(fm, dna_array, B, 3*B/2, 1);
+        Tester.test0(fm, dna_array, 2*B, 3*B, 2);
+        Tester.test0(fm, dna_array, 3*B, 7*B/2, 3);
+        Tester.test0(fm, dna_array, 4*B, 5*B, 1);
+        ArrayList<Integer> L = new ArrayList<>();
+        L.add(dna_array.get(5*B).hashCode());
+        fm.append(L);*/
+
         int n = 10000;
-        System.out.println("Insertando " + n + " claves");
-        for (DNA dna: dna_array.subList(0, n))
-            btree.put(dna, 0);
-        System.out.println("Buscando mismas claves insertadas");
-        int cnt = 0;
-        for (DNA dna: dna_array.subList(0, n))
-            if(btree.containsKey(dna))
-                cnt++;
-        System.out.println("Encontradas " + cnt + " claves");
+        Tester.test1(btree, dna_array, n);
 
     }
 }
