@@ -31,9 +31,15 @@ public class Main {
         FileManager fm = new FileManager(B, fd);
         Dictionary btree = new BTreeDict(pathname, B);
         //System.out.println(fd.getAbsolutePath());
-        Tester.test0(fm, dna_array, 0, B, 0);
-        Tester.test0(fm, dna_array, B, 3*B/2, 1);
-        Tester.test0(fm, dna_array, 2*B, 3*B, 2);
-
+        //Tester.test0(fm, dna_array, 0, B, 0);
+        //Tester.test0(fm, dna_array, B, 3*B/2, 1);
+        //Tester.test0(fm, dna_array, 2*B, 3*B, 2);
+        //Tester.test0(fm, dna_array, 3*B, 7*B/2, 3);
+        //Tester.test0(fm, dna_array, 4*B, 5*B, 1);
+        //ArrayList<Integer> L = new ArrayList<>();
+        //L.add(dna_array.get(5*B).hashCode());
+        //fm.append(L);
+        for (DNA dna: dna_array.subList(0, 100))
+            btree.put(dna, 0);
     }
 }

@@ -4,6 +4,7 @@ import utils.DNA;
 import utils.FileManager;
 
 import java.io.File;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 
 public class BTreeDict implements Dictionary {
@@ -55,7 +56,7 @@ public class BTreeDict implements Dictionary {
             this.B = b;
             this.offset = offset;
             this.block_size = values.get(0) & 0xbfffffff;
-            for(int i = 0; i < this.block_size; i++)
+            for(int i = 1; i <= this.block_size; i++)
                 this.values.add(new DNA(values.get(i)));
         }
 
@@ -117,6 +118,9 @@ public class BTreeDict implements Dictionary {
                 i++;
             }
             offset = node.getPointers().get(i); //guardar referencia de sgte nodo para ser leido
+            //se revisa siguiente bloque
+            values = fm.read(offset, true);
+            isLeaf = (values.get(0) >> 31) & 0x1;
             visited_nodes.add(node); // mantener registro de nodos visitados
             h++;
         }
@@ -128,14 +132,14 @@ public class BTreeDict implements Dictionary {
         while(i < dnas.size()) {
             int cmp = key.compareTo(dnas.get(i));
             if (cmp < 0) { //se puede insertar
-                dnas.add(i, key);
                 break;
             }
             i++;
         } //Notar que si clave ya esta, no se hará insercion
+        dnas.add(i, key);
         // Si hay rebalse de la hoja, se divide y se agrega mediana al padre
         if(dnas.size() > B){
-            int m = dnas.size()/2;
+            int m = (dnas.size()-1)/2;
             ArrayList<Integer> new_leaf1 = new ArrayList<>();
             ArrayList<Integer> new_leaf2 = new ArrayList<>();
             // dividir segun mediana
@@ -150,16 +154,26 @@ public class BTreeDict implements Dictionary {
             fm.write(new_leaf1, new_offset1);
             // segunda hoja se pone en el siguiente bloque libre en el archivo
             int new_offset2 = fm.append(new_leaf2);
+            /*System.out.println("Split leaf " + offset
+                    + " into leaf " + new_offset1 + " with blocksize: " + new_leaf1.size()
+                    + " and leaf " + new_offset2 + " with blocksize: " + new_leaf2.size());*/
 
             // se sube clave mediana
             DNA new_key = dnas.get(m);
             // se revisara registro de nodos visitados de abajo hacia arriba
             int k = visited_nodes.size() - 1;
             // se agrega una nueva clave y una nueva referencia
-            BTreeNode node = visited_nodes.get(k);
+            BTreeNode node = null;
             // entonces el nodo padre debe tener ese espacio
-            while(node.block_size + 2 > B){
+            //System.out.println("Visited nodes: " + (k + 1));
+            if(k >= 0) {
+                node = visited_nodes.get(k);
+                //System.out.println("Checking block: " + node.getOffset() + " with blocksize: " + node.block_size);
+                while(node.block_size + 2 > B){
                 // sino, dividimos y subimos una clave
+                /*System.out.println("Subir clave "
+                        + Integer.toHexString(new_key.hashCode())
+                        + "a bloque " + node.getOffset());*/
                 ArrayList<Integer> node_pointers = node.getPointers();
                 ArrayList<DNA> node_keys = visited_nodes.get(k).getKeys();
                 // agregar mediana
@@ -168,10 +182,11 @@ public class BTreeDict implements Dictionary {
                         node_keys.add(j, new_key);
                         node_pointers.set(j, new_offset1);
                         node_pointers.add(j + 1, new_offset2);
+                        break;
                     }
                 }
                 // dividir
-                m = node_keys.size()/2;
+                m = (node_keys.size()-1)/2;
                 ArrayList<Integer> new_node1 = new ArrayList<>();
                 ArrayList<Integer> new_node2 = new ArrayList<>();
                 // 1 1 2 2 3 3 4 4 5 5 6 6 7
@@ -194,6 +209,9 @@ public class BTreeDict implements Dictionary {
                 fm.write(new_node1, new_offset1, true);
                 // segundo nodo se pone en el siguiente bloque libre en el archivo
                 new_offset2 = fm.append(new_node2, true);
+                /*System.out.println("Split node " + node.getOffset()
+                        + " into node " + new_offset1 + " with blocksize: " + new_node1.size()
+                        + " and node " + new_offset2 + " with blocksize: " + new_node2.size());*/
                 // se guarda nueva clave
                 new_key = node_keys.get(m);
                 k--;
@@ -201,7 +219,7 @@ public class BTreeDict implements Dictionary {
                     break;
                 // agregar clave a siguiente nodo
                 node = visited_nodes.get(k);
-            }
+            }}
             // si dividimos la raiz, se tiene que crear una raiz nueva
             // con una clave y dos referencias
             if(k < 0) {
@@ -211,6 +229,10 @@ public class BTreeDict implements Dictionary {
                 new_node.add(new_offset2);
                 // nuevo nodo se pone en el siguiente bloque libre
                 this.offset_raiz = fm.append(new_node, true);
+                /*System.out.println("Subir clave "
+                        + Integer.toHexString(new_key.hashCode())
+                        + "a bloque " + this.offset_raiz);
+                System.out.println("Adding new raiz: " + this.offset_raiz + " with blocksize: " + new_node.size());*/
             } else { // si no, solo se tiene que insertar nueva clave y referencias en nodo
                 ArrayList<Integer> node_pointers = node.getPointers();
                 ArrayList<DNA> node_keys = visited_nodes.get(k).getKeys();
@@ -227,12 +249,22 @@ public class BTreeDict implements Dictionary {
                         new_node.add(node_keys.get(j).hashCode());
                     }
                 }
+                new_node.add(node_pointers.get(node_keys.size()));
                 //se escribe nodo actualizado en bloque donde estaba
                 fm.write(new_node, node.getOffset(), true);
+                /*System.out.println("Updating node: " + node.getOffset()
+                        + " with blocksize: " + new_node.size()
+                        + "(" + Integer.toHexString(new_key.hashCode()) + ")");*/
             }
         }
-        else //si no hay rebalse, solo se escribe nodo actualizado
-            fm.write(leaf.getIntValues(), leaf.getOffset(), false);
+        else { //si no hay rebalse, solo se escribe nodo actualizado
+            ArrayList<Integer> new_leaf = new ArrayList<>();
+            for(DNA dna: dnas)
+                new_leaf.add(dna.hashCode());
+            fm.write(new_leaf, leaf.getOffset(), false);
+            /*System.out.println("Updating leaf: " + leaf.getOffset() + " with blocksize: " + new_leaf.size()
+                    + "(" + Integer.toHexString(key.hashCode()) + ")");*/
+        }
     }
 
     public void delete(DNA key){}

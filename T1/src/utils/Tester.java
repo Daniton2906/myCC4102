@@ -14,13 +14,13 @@ public class Tester {
         ArrayList<Integer> LI = new ArrayList<>();
         for(int i= from; i < to; i++){
             LI.add(dna_array.get(i).hashCode());
-            //System.out.println(dna_array.get(i).hashCode());
+            System.out.println(dna_array.get(i).hashCode());
         }
         fm.write(LI, b_offset);
-
         ArrayList<Integer> L2 = fm.read(b_offset);
-        for(int dna: L2);
-            //System.out.println(dna);
+        for(int dna: L2)
+            System.out.println(dna);
+        System.out.println("############################");
     }
 
     static public void test1(Dictionary dict, ArrayList<DNA> chain_array){

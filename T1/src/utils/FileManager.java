@@ -52,9 +52,9 @@ public class FileManager {
             int seq = ByteBuffer.wrap(bs).getInt(), block_size;
             //System.out.println("seq:" + seq);
             if (lastBit) {
-                block_size = 4 * (seq & 0x7fffffff);
+                block_size = seq & 0x7fffffff;
                 int_array.add(seq);
-            } else block_size = 4 * seq;
+            } else block_size = seq;
             // Get DNA values
             //System.out.println("Block size:" + block_size);
             byte[] blocks = new byte[block_size * 4];
@@ -62,10 +62,10 @@ public class FileManager {
                 return null;
             }
             ByteBuffer bb = ByteBuffer.wrap(blocks);
-            for (int i = 0; i < block_size; i += 4) {
+            for (int i = 0; i < 4* block_size; i += 4) {
                 int_array.add(bb.getInt(i));
             }
-
+            //System.out.println("Serialized data[" + block_size + "/" + (this.B-1) + "] is readed in " + fd.getName() + ":" + block_offset);
             fileIn.close();
         } catch (IOException i) {
             i.printStackTrace();
@@ -84,19 +84,16 @@ public class FileManager {
         try {
             FileInputStream fileIn = new FileInputStream(this.fd);
             byte[] bsPrev = new byte[block_offset * this.B * 4];
-            byte[] bsNext = new byte[Math.max(this.counter - (block_offset + 1) * B  * 4, 0)];
-            fileIn.read(bsPrev);
-            fileIn.skip(B * 4);
-            fileIn.read(bsNext);
+            byte[] bsNext = new byte[Math.max((this.counter - (block_offset + 1)) * B  * 4, 0)];
+            int r1 = fileIn.read(bsPrev);
+            long r0 = fileIn.skip(B * 4);
+            int r2 = fileIn.read(bsNext);
             fileIn.close();
 
             FileOutputStream fileOut = new FileOutputStream(this.fd);
             ByteBuffer dbuf = ByteBuffer.allocate(this.B * 4);
             int mask = lastBit? 0x80000000: 0;
-            //System.out.println("Block size: " + block_size);
-            //System.out.println("seq: " + (block_size | mask));
             dbuf.putInt(block_size | mask);
-            //, block_offset * B  * 4, 4
             // Write all block
             for (int i = 0; i < block_size; i++) {
                 dbuf.putInt(int_array.get(i));
@@ -107,7 +104,7 @@ public class FileManager {
             fileOut.write(dbuf.array());
             fileOut.write(bsNext);
             fileOut.close();
-            System.out.println("Serialized data[" + block_size + "/" + (this.B-1) + "] is saved in " + fd.getName());
+            //System.out.println("Serialized data[" + block_size + "/" + (this.B-1) + "] is saved in " + fd.getName() + ":" + block_offset);
         } catch (IOException i) {
             // i.printStackTrace();
             return false;
