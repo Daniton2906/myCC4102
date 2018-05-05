@@ -80,6 +80,31 @@ public class LinealHashDict implements Dictionary {
         }
     }
 
+    // retorna referencia al primer bloque de la lista enlazada que contine a key.
+    private int getReferenc(DNA key) {
+        // primer numero en el bloque 0 es la cantidad de referencias.
+        int page = 1 + key.hashCode() % (1 << (t+1));
+        if(this.p < page)
+            page = 1 + key.hashCode() % (1 << t);
+
+        // obtener bloque de referencias a bloques activos.
+        ArrayList<Integer> reference_block = this.fm.read(0);
+
+        // obtener cantidad de bloques activos.
+        int cant_active_block = reference_block.get(0);
+
+        // si la pagina que se busca sale del arreglo de referencias que se obtuvieron,
+        // empezar a buscar en la siguiente pagina de referencias.
+        while(cant_active_block < page) {
+            page -= cant_active_block;
+            reference_block = this.fm.read(reference_block.get(B-1));
+            cant_active_block = reference_block.get(0);
+        }
+
+        return reference_block.get(page);
+
+    }
+
     // expande estructura de hashing lineal (inclompleto).
     private void expand() {
         // determinar si existen bloques en desuso.
@@ -120,26 +145,7 @@ public class LinealHashDict implements Dictionary {
 
     // inserta un elemento en el diccionario (completo, falta terminar expand).
     public void put(DNA key, long value) {
-        // primer numero en el bloque 0 es la cantidad de referencias.
-        int page = 1 + key.hashCode() % (1 << (t+1));
-        if(this.p < page)
-            page = 1 + key.hashCode() % (1 << t);
-
-        // obtener bloque de referencias a bloques activos.
-        ArrayList<Integer> reference_block = this.fm.read(0);
-
-        // obtener cantidad de bloques activos.
-        int cant_active_block = reference_block.get(0);
-
-        // si la pagina que se busca sale del arreglo de referencias que se obtuvieron,
-        // empezar a buscar en la siguiente pagina de referencias.
-        while(cant_active_block < page) {
-            page -= cant_active_block;
-            reference_block = this.fm.read(reference_block.get(B-1));
-            cant_active_block = reference_block.get(0);
-        }
-
-        int reference_page = reference_block.get(page);
+        int reference_page = this.getReferenc(key);
         ArrayList<Integer> page_content = this.fm.read(reference_page);
 
         // colocar caso en que la pagina ya esta llena, por lo que es necesario buscar en el siguiente bloque.
@@ -180,32 +186,10 @@ public class LinealHashDict implements Dictionary {
 
     // metodo para eliminar un elemento de un diccionario (posiblemente completo).
     public void delete(DNA key){
-        // primer numero en el bloque 0 es la cantidad de referencias.
-        // page: numero del bloque donde se debe buscar key.
-        int page = 1 + key.hashCode() % (1 << (t+1));
-        if(this.p < page)
-            page = 1 + key.hashCode() % (1 << t);
-
-        // obtener bloque con referencias.
-        // reference_block: arreglo del bloque de referencias a bloques activos.
-        ArrayList<Integer> reference_block = this.fm.read(0);
-
-        // obtener cantidad de bloques activos.
-        // cant_active_block: cantidad de bloques activos.
-        int cant_active_block = reference_block.get(0);
-
-        // si la pagina que se busca sale del arreglo de referencias que se obtuvieron,
-        // empezar a buscar en la siguiente pagina de referencias.
-        while(cant_active_block < page) {
-            page -= cant_active_block;
-            reference_block = this.fm.read(reference_block.get(B-1));
-            cant_active_block = reference_block.get(0);
-        }
-
         // obtencion referencia a pagina y contenido de pagina objetivo.
         // reference_page: referencia a la pagina donde esta key.
         // page_content: bloque donde deberia esta la key buscada.
-        int reference_page = reference_block.get(page);
+        int reference_page = this.getReferenc(key);
         ArrayList<Integer> page_content = this.fm.read(reference_page);
 
         // colocar caso en que la pagina ya esta llena, por lo que es necesario buscar en el siguiente bloque.
@@ -316,27 +300,8 @@ public class LinealHashDict implements Dictionary {
 
     // metodo que determina si un elemento se encuentra dentro del diccionario (listo)
     public boolean containsKey(DNA key){
-        // primer numero en el bloque 0 es la cantidad de referencias.
-        int page = 1 + key.hashCode() % (1 << (t+1));
-        if(this.p < page)
-            page = 1 + key.hashCode() % (1 << t);
-
-        // obtener bloque con referencias
-        ArrayList<Integer> reference_block = this.fm.read(0);
-
-        // obtener cantidad de bloques activos.
-        int cant_active_block = reference_block.get(0);
-
-        // si la pagina que se busca sale del arreglo de referencias que se obtuvieron,
-        // empezar a buscar en la siguiente pagina de referencias.
-        while(cant_active_block < page) {
-            page -= cant_active_block;
-            reference_block = this.fm.read(reference_block.get(B-1));
-            cant_active_block = reference_block.get(0);
-        }
-
         // obtencion de referencia y contenido de la pagina buscada.
-        int reference_page = reference_block.get(page);
+        int reference_page = this.getReferenc(key);
         ArrayList<Integer> page_content = this.fm.read(reference_page);
 
         boolean res = false;
