@@ -80,7 +80,7 @@ public class LinealHashDict implements Dictionary {
         }
     }
 
-    // retorna referencia al primer bloque de la lista enlazada que contine a key.
+    // retorna referencia al primer bloque de la lista enlazada que contine a key (deberia funcionar XD).
     private int getReferenc(DNA key) {
         // primer numero en el bloque 0 es la cantidad de referencias.
         int page = 1 + key.hashCode() % (1 << (t+1));
@@ -148,8 +148,6 @@ public class LinealHashDict implements Dictionary {
         int reference_page = this.getReferenc(key);
         ArrayList<Integer> page_content = this.fm.read(reference_page);
 
-        // colocar caso en que la pagina ya esta llena, por lo que es necesario buscar en el siguiente bloque.
-        // un bloque contiene los elementos, un numero (cantidad de elementos) y una referencia.
         int cant_elements = page_content.get(0);
         while(cant_elements == B - 2) {
             reference_page = page_content.get(B-1);
@@ -162,9 +160,11 @@ public class LinealHashDict implements Dictionary {
         ArrayList<Integer> new_content = new ArrayList<Integer>();
         new_content.add(page_content.get(0) + 1);
 
+        // reescritura del contenido + la insercion
         for(int i=1; i<page_content.size(); i++)
             new_content.add(page_content.get(i));
 
+        // caso en que el bloque se llena.
         if(new_content.get(0) == B - 2) {
             ArrayList<Integer> last = new ArrayList<Integer>();
             last.add(0);
