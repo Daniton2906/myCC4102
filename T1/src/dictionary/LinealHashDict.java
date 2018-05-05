@@ -118,7 +118,7 @@ public class LinealHashDict implements Dictionary {
     // contrae estructura de hashing lineal (incompleto).
     private void compress() {}
 
-    // inserta un elemento en el diccionario (falta terminar expand).
+    // inserta un elemento en el diccionario (completo, falta terminar expand).
     public void put(DNA key, long value) {
         // primer numero en el bloque 0 es la cantidad de referencias.
         int page = 1 + key.hashCode() % (1 << (t+1));
@@ -181,14 +181,17 @@ public class LinealHashDict implements Dictionary {
     // metodo para eliminar un elemento de un diccionario (posiblemente completo).
     public void delete(DNA key){
         // primer numero en el bloque 0 es la cantidad de referencias.
+        // page: numero del bloque donde se debe buscar key.
         int page = 1 + key.hashCode() % (1 << (t+1));
         if(this.p < page)
             page = 1 + key.hashCode() % (1 << t);
 
-        // obtener bloque con referencias
+        // obtener bloque con referencias.
+        // reference_block: arreglo del bloque de referencias a bloques activos.
         ArrayList<Integer> reference_block = this.fm.read(0);
 
         // obtener cantidad de bloques activos.
+        // cant_active_block: cantidad de bloques activos.
         int cant_active_block = reference_block.get(0);
 
         // si la pagina que se busca sale del arreglo de referencias que se obtuvieron,
@@ -200,6 +203,8 @@ public class LinealHashDict implements Dictionary {
         }
 
         // obtencion referencia a pagina y contenido de pagina objetivo.
+        // reference_page: referencia a la pagina donde esta key.
+        // page_content: bloque donde deberia esta la key buscada.
         int reference_page = reference_block.get(page);
         ArrayList<Integer> page_content = this.fm.read(reference_page);
 
@@ -218,6 +223,7 @@ public class LinealHashDict implements Dictionary {
 
             if(res)
                 break;
+
             if(cant_elements < B - 2)
                 break;
 
@@ -226,13 +232,10 @@ public class LinealHashDict implements Dictionary {
             cant_elements = page_content.get(0);
         }
 
-        /*
-         si res == true, se encontro la cadena 'key'.
-         page_content: bloque/pagina que contiene la cadena que se estaba buscando.
-         reference_page: referencia al bloque donde esta la cadena buscada.
+        // page_content: bloque/pagina en la lista enlazada, que contiene la cadena que se estaba buscando.
+        // reference_page: referencia al bloque donde esta la cadena buscada.
 
-         falta evitar caso en que la ultima cadena es la cadena que se intenta borrar.
-        */
+        // si res == true, se encontro la cadena 'key' en algun bloque.
         if(res) {
             // se busca el ultimo bloque no vacio de la lista de bloques.
             int last_reference_page = reference_page;
@@ -243,6 +246,7 @@ public class LinealHashDict implements Dictionary {
             while(true) {
                 int cant_last_page = last_page_content.get(0);
                 ArrayList<Integer> change_page = new ArrayList<Integer>();
+
                 if (0 < cant_last_page && cant_last_page < B - 2) {
                     // cambio por ultima cadena
                     last_chain = last_page_content.get(cant_last_page);
@@ -251,9 +255,6 @@ public class LinealHashDict implements Dictionary {
                         change_page.add(last_page_content.get(i));
 
                     this.fm.write(change_page, last_reference_page);
-
-                    if(cant_last_page == pos_chain_to_delete)
-                        same_block = false;
 
                     break;
                 }
@@ -275,11 +276,11 @@ public class LinealHashDict implements Dictionary {
 
                     this.fm.write(change_page, last_reference_page);
 
-                    if(cant_last_page == pos_chain_to_delete)
-                        same_block = false;
-
                     break;
                 }
+                // same_block: con esto se determina si el elemento eliminado esta en el ultimo bloque de la
+                //             lista enlazada.
+                same_block = false;
 
                 last_reference_page = next_reference;
                 last_page_content = next_page_content;
@@ -291,7 +292,7 @@ public class LinealHashDict implements Dictionary {
             // reference_page: referencia al bloque donde esta la cadena buscada.
             // en caso de que la cadena a eliminar no es la ultima de la lista enlazada, hacer el cambio.
             ArrayList<Integer> new_content = new ArrayList<Integer>();
-            if(same_block) {
+            if(!same_block && pos_chain_to_delete < last_page_content.get(0)) {
                 for(int i=1; i<=cant_elements; i++) {
                     if(i == pos_chain_to_delete)
                         new_content.add(last_chain);
@@ -301,7 +302,6 @@ public class LinealHashDict implements Dictionary {
 
                 this.fm.write(new_content, reference_page);
             }
-
             // en caso que no se cumpla if, ya se elimino el ultimo elemento dentro del while.
 
         }
