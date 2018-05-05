@@ -65,11 +65,17 @@ public class BTreeDict implements Dictionary {
         }
 
         private boolean delete(DNA key) {
-            int j = 0;
-            for (; j < this.keys.size(); j++) {
+            return delete(key, true);
+        }
+
+        private boolean delete(DNA key, boolean delete_prev) {
+            for (int j = 0; j < this.keys.size(); j++) {
                 if (key.compareTo(this.keys.get(j)) == 0) {
                     this.keys.remove(j);
-                    this.pointers.remove(j);
+                    if(delete_prev)
+                        this.pointers.remove(j);
+                    else
+                        this.pointers.remove(j + 1);
                     return true;
                 }
             } return false;
@@ -77,6 +83,16 @@ public class BTreeDict implements Dictionary {
 
         private BTreeNode join(BTreeNode other_node) {
             return null;
+        }
+
+        private DNA replace_key(int index, DNA value) {
+            if(index < this.keys.size())
+                return this.keys.set(index, value);
+            return null;
+        }
+
+        private boolean replace_pointer(int index, DNA value) {
+            return false;
         }
 
     }
@@ -249,8 +265,8 @@ public class BTreeDict implements Dictionary {
                     ArrayList<DNA> node_keys = visited_nodes.get(k).getKeys();
                     // dividir
                     m = (node_keys.size()-1)/2;
-                    ArrayList<Integer> new_node1 = new ArrayList<>();
-                    ArrayList<Integer> new_node2 = new ArrayList<>();
+                    ArrayList<Integer> new_node1 = new ArrayList<>(),
+                            new_node2 = new ArrayList<>();
                     // 1 1 2 2 3 3 4 4 5 5 6 6 7
                     // x o x o x ô x o x o x
                     // x o x o x ô x o x o x o x
@@ -326,6 +342,188 @@ public class BTreeDict implements Dictionary {
     }
 
     public void delete(DNA key){
+        if(this.offset_raiz == -1) {
+            return;
+        }
+        int offset = offset_raiz;
+        // leer considerando que bms del primer valor entrega tipo de nodo
+        ArrayList<Integer> values = fm.read(offset, true);
+        int isLeaf = (values.get(0) >> 31) & 0x1;
+        ArrayList<BTreeNode> visited_nodes = new ArrayList<>();
+        ArrayList<Integer> visited_index = new ArrayList<>();
+        int h = 0;
+        // Buscar hoja bajando por nodos correspondiente
+        while (isLeaf != 0) //hasta encontrar una hoja
+        {
+            BTreeNode node = new BTreeNode(this.B, offset, values);
+            ArrayList<DNA> dnas = node.getKeys();
+            int i = 0;
+            // buscamos clave en nodo
+            while(i < dnas.size()) {
+                int cmp = key.compareTo(dnas.get(i));
+                if(cmp <= 0) //se encontro clave donde se puede insertar
+                    break;
+                i++;
+            }
+            visited_index.add(i);
+            offset = node.getPointers().get(i); //guardar referencia de sgte nodo para ser leido
+            //se revisa siguiente bloque
+            values = fm.read(offset, true);
+            isLeaf = (values.get(0) >> 31) & 0x1;
+            visited_nodes.add(node); // mantener registro de nodos visitados
+            h++;
+        }
+        // se elimina llave a hoja
+        BTreeLeaf leaf = new BTreeLeaf(this.B, offset, values);
+        leaf.delete(key);
+        ArrayList<DNA> dnas = leaf.getValues(); // valores vienen ordenados
+        // Si menos de la mitad del bloque queda ocupado, se fusiona con el vecino
+        if(dnas.size() < B/2 && offset != this.offset_raiz){
+            int n_k = h - 1, v_k = visited_index.get(n_k);
+            BTreeNode node_father = visited_nodes.get(n_k);
+            int n = node_father.getKeys().size(),
+                    v_i = v_k == n? v_k - 1: v_k + 1,
+                    v_offset = node_father.getPointers().get(v_i); //guardar referencia de sgte nodo para ser leido
+            values = fm.read(v_offset, true);
+            BTreeLeaf v_leaf = new BTreeLeaf(this.B, v_offset, values);
+            // unir hojas
+            BTreeLeaf new_leaf = leaf.join(v_leaf);
+            //se revisa que no haya rebalse al unir hojas
+            if(new_leaf.getValues().size() > B){
+                int m = (new_leaf.getValues().size() - 1) / 2;
+                ArrayList<Integer> new_leaf1 = new ArrayList<>(),
+                        new_leaf2 = new ArrayList<>();
+                for (int j = 0; j < dnas.size(); j++) {
+                    if(j <= m) // nuevo nodo izquierdo se queda con mediana y sus predecesores
+                        new_leaf1.add(dnas.get(j).hashCode());
+                    else if (j > m) // nuevo nodo derecho se queda con lo sucesores de la mediana
+                        new_leaf2.add(dnas.get(j).hashCode());
+                }
+                // primera hoja se guarda en mismo bloque usado por hoja original
+                fm.write(new_leaf1, offset);
+                // segunda hoja se pone en donde estaba la otra hoja
+                fm.write(new_leaf2, v_offset);
+                if(debug) System.out.println("Split leaf " + offset
+                        + " into leaf " + offset + " with blocksize: " + new_leaf1.size()
+                        + " and leaf " + v_offset + " with blocksize: " + new_leaf2.size());
+                node_father.replace_key(v_k == n? v_k - 1: v_k, dnas.get(m));
+            } else { //si no hay rebalse, se escribe hoja
+                // primera hoja se guarda en mismo bloque usado por hoja original
+                fm.write(new_leaf.getIntValues(), offset, false);
+                // segunda hoja se pone en el siguiente bloque libre en el archivo
+                if(debug) System.out.println("Joining leafs " + offset
+                        + " and " + v_offset + " in leaf: " + offset
+                        + " with blocksize: " + new_leaf.getValues().size());
+                // hay una llave y referencia por eliminar en nodo padre
+                DNA deleted_key;
+                if(v_k == n) { // se elimina llave previa
+                    deleted_key = node_father.getKeys().get(v_k - 1);
+                    node_father.delete(deleted_key);
+                } else { // se elimina llave siguiente
+                    deleted_key = node_father.getKeys().get(v_k);
+                    node_father.delete(deleted_key, false);
+                }
+                if(debug) System.out.println("Delete key " + deleted_key.hashCode()
+                        + " from node: " + node_father.getOffset()
+                        + " with blocksize: " + (node_father.getKeys().size() + node_father.getPointers().size()));
+                //TODO: revisar que nodos tengan al menos la mitad del bloque
+                // se revisara registro de nodos visitados de abajo hacia arriba
+                int k = visited_nodes.size() - 1;
+                // se fusionan nodos si tienen menos de la mitad del bloque
+                BTreeNode node = node_father;
+                //TODO: arreglar
+                DNA new_key = null;
+                int new_offset1 = 0, new_offset2 = 0;
+                //
+                if(debug) System.out.println("Visited nodes: " + (k + 1));
+                if(k >= 0) {
+                    node = visited_nodes.get(k);
+                    if(debug) System.out.println("Checking node: " + node.getOffset());
+                    //System.out.println("Checking block: " + node.getOffset() + " with blocksize: " + node.block_size);
+                    while(node.block_size + 2 > B){
+                        // sino, dividimos y subimos una clave
+                        if(debug) System.out.println("Subir clave "
+                                + Integer.toHexString(new_key.hashCode())
+                                + "a bloque " + node.getOffset());
+                        node.insert(new_key, new_offset1, new_offset2);
+                        ArrayList<Integer> node_pointers = node.getPointers();
+                        ArrayList<DNA> node_keys = visited_nodes.get(k).getKeys();
+                        // dividir
+                        //TODO: arreglar (sacar m inicializado)
+                        int m = (node_keys.size()-1)/2;
+                        ArrayList<Integer> new_node1 = new ArrayList<>();
+                        ArrayList<Integer> new_node2 = new ArrayList<>();
+                        // 1 1 2 2 3 3 4 4 5 5 6 6 7
+                        // x o x o x ô x o x o x
+                        // x o x o x ô x o x o x o x
+                        for (int j = 0; j < node_keys.size(); j++) {
+                            if(j < m) {
+                                new_node1.add(node_pointers.get(j));
+                                new_node1.add(node_keys.get(j).hashCode());
+                            } else if (j > m) {
+                                new_node2.add(node_pointers.get(j));
+                                new_node2.add(node_keys.get(j).hashCode());
+                            }
+                        }
+                        // el primer nodo no recibe la referencia del indice m en loop
+                        new_node1.add(node_pointers.get(m)); //agregar referencia m
+                        new_node2.add(node_pointers.get(node_keys.size())); //agregar ultima referencia
+                        // primer nodo se guarda en mismo bloque usado por nodo original
+                        new_offset1 = node.getOffset();
+                        fm.write(new_node1, new_offset1, true);
+                        // segundo nodo se pone en el siguiente bloque libre en el archivo
+                        new_offset2 = fm.append(new_node2, true);
+                        if(debug) System.out.println("Split node " + node.getOffset()
+                                + " into node " + new_offset1 + " with blocksize: " + new_node1.size()
+                                + " and node " + new_offset2 + " with blocksize: " + new_node2.size());
+                        // se guarda nueva clave
+                        new_key = node_keys.get(m);
+                        k--;
+                        if(k < 0) // si no quedan nodos por revisar, hay que crear uno nuevo
+                            break;
+                        // agregar clave a siguiente nodo
+                        node = visited_nodes.get(k);
+                    }
+                }
+                if(debug) System.out.println("Subir clave "
+                        + Integer.toHexString(new_key.hashCode())
+                        + "a bloque " + this.offset_raiz);
+                // si dividimos la raiz, se tiene que crear una raiz nueva
+                // con una clave y dos referencias
+                if(k < 0) {
+                    ArrayList<Integer> new_node = new ArrayList<>();
+                    new_node.add(new_offset1);
+                    new_node.add(new_key.hashCode());
+                    new_node.add(new_offset2);
+                    // nuevo nodo se pone en el siguiente bloque libre
+                    this.offset_raiz = fm.append(new_node, true);
+                    if(debug) System.out.println("Adding new raiz: "
+                            + this.offset_raiz + " with blocksize: " + new_node.size()
+                            + "(" + Integer.toHexString(new_key.hashCode()) + ")");
+                } else { // si no, solo se tiene que insertar nueva clave y referencias en nodo
+                    node.insert(new_key, new_offset1, new_offset2);
+                    ArrayList<Integer> node_pointers = node.getPointers();
+                    ArrayList<DNA> node_keys = visited_nodes.get(k).getKeys();
+                    ArrayList<Integer> new_node = new ArrayList<>();
+                    for(int j = 0; j < node_keys.size(); j++) {
+                        new_node.add(node_pointers.get(j));
+                        new_node.add(node_keys.get(j).hashCode());
+                    }
+                    new_node.add(node_pointers.get(node_keys.size()));
+                    //se escribe nodo actualizado en bloque donde estaba
+                    fm.write(new_node, node.getOffset(), true);
+                    if(debug) System.out.println("Updating node: " + node.getOffset()
+                            + " with blocksize: " + new_node.size()
+                            + "(" + Integer.toHexString(new_key.hashCode()) + ")");
+                }
+            }
+        }
+        else { //si no hay escasez, solo se actualiza hoja
+            fm.write(leaf.getIntValues(), leaf.getOffset(), false);
+            if(debug) System.out.println("Deleting " + Integer.toHexString(key.hashCode())
+                    + " from leaf: " + leaf.getOffset()
+                    + " with blocksize: " + leaf.getValues().size());
+        }
 
     }
 
