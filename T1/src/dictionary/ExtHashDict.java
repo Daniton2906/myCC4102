@@ -4,6 +4,7 @@ import utils.DNA;
 import utils.FileManager;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class ExtHashDict implements Dictionary {
@@ -157,38 +158,6 @@ public class ExtHashDict implements Dictionary {
         }
     }
 
-    // comprime un par de nodos hermanos, si la cantidad de elementos es muy baja (listo (?)).
-    private void compress(Node nodo) {
-        Node parent = nodo.getParent();
-
-        Node left = parent.getLeftNode();
-        Node right = parent.getRightNode();
-
-        int left_reference = left.getReference();
-        ArrayList<Integer> left_content = this.fm.read(left_reference);
-
-        int right_reference = right.getReference();
-        ArrayList<Integer> right_content = this.fm.read(right_reference);
-
-        // en caso de que sea posible juntar las paginas.
-        if(right_content.get(0) + left_content.get(0) < B-2) {
-            ArrayList<Integer> new_content = new ArrayList<>();
-            new_content.add(right_content.get(0) + left_content.get(0));
-
-            for(int i=1; i<= left_content.get(0); i++)
-                new_content.add(left_content.get(i));
-
-            for(int i=1; i<= right_content.get(0); i++)
-                new_content.add(right_content.get(i));
-
-            parent.activateReference(true);
-            parent.setReference(left_reference);
-            // referencia derecha dejarla en las referencias en desuso.
-
-            this.fm.write(new_content, left_reference);
-        }
-    }
-
     // inserta elemento en el hash (listo).
     public void put(DNA key, long value) {
         Node actual_node = this.getReference(key);
@@ -235,7 +204,39 @@ public class ExtHashDict implements Dictionary {
         }
     }
 
-    // falta por terminar.
+    // comprime un par de nodos hermanos, si la cantidad de elementos es muy baja (listo (?)).
+    private void compress(Node nodo) {
+        Node parent = nodo.getParent();
+
+        Node left = parent.getLeftNode();
+        Node right = parent.getRightNode();
+
+        int left_reference = left.getReference();
+        ArrayList<Integer> left_content = this.fm.read(left_reference);
+
+        int right_reference = right.getReference();
+        ArrayList<Integer> right_content = this.fm.read(right_reference);
+
+        // en caso de que sea posible juntar las paginas.
+        if(right_content.get(0) + left_content.get(0) < B-2) {
+            ArrayList<Integer> new_content = new ArrayList<>();
+            new_content.add(right_content.get(0) + left_content.get(0));
+
+            for(int i=1; i<= left_content.get(0); i++)
+                new_content.add(left_content.get(i));
+
+            for(int i=1; i<= right_content.get(0); i++)
+                new_content.add(right_content.get(i));
+
+            parent.activateReference(true);
+            parent.setReference(left_reference);
+            // referencia derecha dejarla en las referencias en desuso.
+
+            this.fm.write(new_content, left_reference);
+        }
+    }
+
+    // elimina el elemento key del diccionario, si es que esta contenido (listo (?)).
     public void delete(DNA key){
         Node actual_node = this.getReference(key);
 
@@ -243,21 +244,79 @@ public class ExtHashDict implements Dictionary {
         ArrayList<Integer> content = this.fm.read(reference_page);
 
         int last_page = reference_page;
+        int last_chain = 0;
         ArrayList<Integer> last_content = content;
 
         int total_elements = 0, altura = actual_node.getAltura();
+
+        // last_block: referencia al ultimo bloque.
+        // search_block: referencia al bloque con el elemento buscado.
+        int last_block = 0, search_block = -1;
+        ArrayList<Integer> new_content = new ArrayList<>();
         while(true) {
             total_elements += last_content.get(0);
+            if(search_block == -1) {
+                int i = 1;
+                for (; i <= last_content.get(0); i++) {
+                    if (last_content.get(i) == key.hashCode()) {
+                        search_block = last_page;
+                        break;
+                    }
+                }
 
+                if(search_block != -1) {
+                    new_content.add(last_content.get(0) - 1);
+                    for(int j=1; j<= last_content.get(0); j++) {
+                        if(j != i)
+                            new_content.add(last_content.get(j));
+                    }
+
+                    this.fm.write(new_content, search_block);
+                }
+            }
+
+            if(last_content.get(0) != 0) {
+                last_block = last_page;
+                last_chain = last_content.get(last_content.get(0));
+            }
+
+            if(last_content.get(0) != B - 2)
+                break;
 
             last_page = last_content.get(B-1);
             last_content = this.fm.read(last_page);
         }
 
+        // colocar el ultimo elemento de la lista de paginas, en la posicion del elemento eliminado
+        if(last_block != search_block) {
+            last_content = this.fm.read(last_block);
+            ArrayList<Integer> aux = new ArrayList<>();
+
+            aux.add(last_content.get(0) - 1);
+            for(int i=1; i<last_content.get(0); i++) {
+                aux.add(last_content.get(i));
+            }
+            if(last_content.get(0) == B-2) {
+                // colocar referencia en bloque de desuso.
+            }
+            aux.clear();
+
+            this.fm.write(aux, last_block);
+
+            last_content = this.fm.read(search_block);
+            aux.add(last_content.get(0) + 1);
+            for(int i=1; i<=last_content.get(0); i++) {
+                aux.add(last_content.get(i));
+            }
+            aux.add(last_chain);
+
+            this.fm.write(aux, search_block);
+        }
+
         // se lleno la pagina y aun no se llega al final del hashing.
-        //if(total_elements >= B - 2 && altura < 30){
-            //this.compress(actual_node);
-        //}
+        if(total_elements >= B - 2 && altura < 30 && search_block != -1 && 0 < altura){
+            this.compress(actual_node);
+        }
 
     }
 
