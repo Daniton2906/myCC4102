@@ -31,7 +31,7 @@ public class DNA {
                 default: // 'G'
                     break;
             }
-            codeNum <<= 2;
+            // codeNum <<= 2;
         }
         this.hashcode = codeNum;
     }
@@ -39,7 +39,7 @@ public class DNA {
     public DNA(int codeNum) {
         super();
         this.hashcode = codeNum;
-        codeNum >>= 2;
+        // codeNum >>= 2;
         myChain = new ArrayList<>();
         for (int i = 0; i < CHAIN_LENGTH; i++) {
             switch (codeNum & 0x3){
