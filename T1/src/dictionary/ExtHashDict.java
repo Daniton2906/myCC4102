@@ -2,7 +2,6 @@ package dictionary;
 
 import utils.DNA;
 import utils.FileManager;
-
 import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -11,7 +10,7 @@ public class ExtHashDict implements Dictionary {
 
     private class Node {
 
-        private boolean L = false, R = false, has_page = false;
+        private boolean has_page = false;
         private Node left = null, right = null, parent = null;
         private int reference, altura;
 
@@ -77,7 +76,7 @@ public class ExtHashDict implements Dictionary {
 
     }
 
-    // retorna nodo al que esta asociado a la pagina buscada segun el hash (listo).
+    // retorna nodo al que esta asociado a la pagina buscada segun el hash (completo, sin testear).
     private Node getReference(DNA key) {
         int hash = key.hashCode();
 
@@ -100,7 +99,7 @@ public class ExtHashDict implements Dictionary {
 
     }
 
-    // metodo de duplicacion de nodos (listo).
+    // metodo de duplicacion de nodos (completo, falta testear).
     private void duplicate(Node nodo) {
         int reference_page = nodo.getReference();
         ArrayList<Integer> content = this.fm.read(reference_page);
@@ -127,7 +126,6 @@ public class ExtHashDict implements Dictionary {
         Node l = new Node(reference_page);
         l.setAltura(shift + 1);
 
-        // FALTA: dar la opcion de usar nodos en desuso.
         this.fm.write(right, this.last);
         Node r = new Node(this.last); this.last++;
         r.setAltura(shift + 1);
@@ -158,7 +156,7 @@ public class ExtHashDict implements Dictionary {
         }
     }
 
-    // inserta elemento en el hash (listo).
+    // inserta elemento en el hash (completo, falta testear).
     public void put(DNA key, long value) {
         Node actual_node = this.getReference(key);
 
@@ -172,7 +170,7 @@ public class ExtHashDict implements Dictionary {
         while(true) {
             total_elements += last_content.get(0);
             if(last_content.get(0) != B-2) {
-                ArrayList<Integer> new_content = new ArrayList<Integer>();
+                ArrayList<Integer> new_content = new ArrayList<>();
 
                 new_content.add(last_content.get(0) + 1);
                 for(int i=1; i<=last_content.get(0); i++)
@@ -183,13 +181,14 @@ public class ExtHashDict implements Dictionary {
                     new_content.add(this.last);
                     this.fm.write(new_content, reference_page);
 
-                    ArrayList<Integer> last = new ArrayList<Integer>();
+                    ArrayList<Integer> last = new ArrayList<>();
                     last.add(0);
                     this.fm.write(last, this.last);
 
                     this.last++;
 
                 }
+                total_elements++;  // por el elmento que se inserto.
                 break;
 
             }
@@ -204,7 +203,7 @@ public class ExtHashDict implements Dictionary {
         }
     }
 
-    // comprime un par de nodos hermanos, si la cantidad de elementos es muy baja (listo (?)).
+    // comprime un par de nodos hermanos, si la cantidad de elementos es muy baja (completo, falta testear).
     private void compress(Node nodo) {
         Node parent = nodo.getParent();
 
@@ -236,22 +235,21 @@ public class ExtHashDict implements Dictionary {
         }
     }
 
-    // elimina el elemento key del diccionario, si es que esta contenido (listo (?)).
+    // elimina el elemento key del diccionario, si es que esta contenido (completo, falta testear).
     public void delete(DNA key){
         Node actual_node = this.getReference(key);
 
         int reference_page = actual_node.getReference();
         ArrayList<Integer> content = this.fm.read(reference_page);
 
-        int last_page = reference_page;
-        int last_chain = 0;
+        int last_page = reference_page, last_chain = 0;
         ArrayList<Integer> last_content = content;
 
         int total_elements = 0, altura = actual_node.getAltura();
 
         // last_block: referencia al ultimo bloque.
         // search_block: referencia al bloque con el elemento buscado.
-        int last_block = 0, search_block = -1;
+        int last_block = reference_page, search_block = -1;
         ArrayList<Integer> new_content = new ArrayList<>();
         while(true) {
             total_elements += last_content.get(0);
@@ -314,13 +312,13 @@ public class ExtHashDict implements Dictionary {
         }
 
         // se lleno la pagina y aun no se llega al final del hashing.
-        if(total_elements >= B - 2 && altura < 30 && search_block != -1 && 0 < altura){
+        if(total_elements < (B - 2) / 2 && search_block != -1 && 0 < altura){
             this.compress(actual_node);
         }
 
     }
 
-    // retorna true si la cadena de DNA se encuentra en el diccionario (listo).
+    // retorna true si la cadena de DNA se encuentra en el diccionario (completo, falta testear).
     public boolean containsKey(DNA key){
         Node actual_node = this.getReference(key);
 
