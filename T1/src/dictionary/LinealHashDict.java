@@ -2,7 +2,6 @@ package dictionary;
 
 import utils.DNA;
 import utils.FileManager;
-import utils.Tuple2;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -12,6 +11,7 @@ public class LinealHashDict implements Dictionary {
     // tamano bloque = 4KB o 512B
     private int B, t, p, last;
     private final FileManager fm;
+    private ArrayList<Integer> index_reference;
 
     // Idea: utilizar dos bloques para guardar referencias a bloques, uno mantiene referencia a bloques de memoria
     //       que estan actualmente siendo utilizados, y el segundo mantiene referencia a bloques que han sido
@@ -24,27 +24,32 @@ public class LinealHashDict implements Dictionary {
         this.fm = new FileManager(B, new File(filename));
         this.B = B;
         this.t = 0;
-        this.p = 1;
+        this.p = 0;
         this.last = 3;
 
-        // referencias en bloque de uso.
+        this.index_reference = new ArrayList<>();
+        index_reference.add(2);
+
+        /*
+        // referencias en bloque de uso (posiblemente se elimine)..
         ArrayList<Integer> id = new ArrayList<Integer>();
         id.add(1); id.add(2);
         this.fm.write(id, 0);
 
-        // referencias en bloque de desuso.
+        // referencias en bloque de desuso (posiblemente se elimine).
         id = new ArrayList<Integer>();
         id.add(0);
         this.fm.write(id, 1);
+        */
 
         // preparacion de primer bloque activo.
-        id = new ArrayList<Integer>();
+        ArrayList<Integer> id = new ArrayList<Integer>();
         id.add(0);
         this.fm.write(id, 2);
     }
 
     // inserta una referencia en un bloque, utilizado para agregar referencia
-    // a pagina de bloques en uso y en desuso (listo).
+    // a pagina de bloques en uso y en desuso (listo, muy probable que no se use).
     private void addReference(int block_inndex, int reference) {
         int new_reference = reference;
         int last_block = block_inndex;
@@ -81,61 +86,29 @@ public class LinealHashDict implements Dictionary {
     }
 
     // retorna referencia al primer bloque de la lista enlazada que contine a key (listo).
-    private int getReferenc(DNA key) {
+    private int getReference(DNA key) {
         // page: referencia a la pagina que contiene key.
-        int page = 1 + key.hashCode() % (1 << (t+1));
+        int page = key.hashCode() % (1 << (t+1));
         if(this.p < page)
-            page = 1 + key.hashCode() % (1 << t);
+            page = key.hashCode() % (1 << t);
 
-        ArrayList<Integer> reference_block = this.fm.read(0);
-
-        // obtener cantidad de bloques activos.
-        int cant_active_block = reference_block.get(0);
-
-        // si la pagina que se busca sale del arreglo de referencias que se obtuvieron,
-        // empezar a buscar en la siguiente pagina de referencias.
-        while(cant_active_block < page) {
-            page -= cant_active_block;
-            reference_block = this.fm.read(reference_block.get(B-1));
-            cant_active_block = reference_block.get(0);
-        }
-
-        return reference_block.get(page);
-
+        return this.index_reference.get(page);
     }
 
     // expande estructura de hashing lineal (inclompleto).
     private void expand() {
-        // determinar si existen bloques en desuso.
-        ArrayList<Integer> reference = this.fm.read(1);
+        int ref_expand = this.last;
+        this.index_reference.add(ref_expand);
+        this.last++;
 
-        int ref_expand = 0;
-        int cant_reference = reference.get(0);
-        if(cant_reference != 0) {
-            while(true) {
-                if(cant_reference == 0)
-                    break;
-
-                ref_expand = reference.get(cant_reference);
-                reference = this.fm.read(reference.get(B-1));
-                cant_reference = reference.get(0);
-            }
-
-        } else {
-            ref_expand = this.last;
-            this.last++;
-        }
-        this.addReference(0, ref_expand);
-
-        // ref_expand tiene indice de bloque vacio.
-        ArrayList<Integer> content1 = new ArrayList<>();
-        ArrayList<Integer> content2 = new ArrayList<>();
+        ArrayList<Integer> content1 = new ArrayList<>(), content2 = new ArrayList<>();
 
         int p1 = (p + 1) % (1 << t), p2 = p + 1;
 
-        int ref1 = this.getReferenc(new DNA(p1));
+        int ref1 = this.index_reference.get(p1);
         int ref2 = ref_expand;
 
+        // separacion del contenido.
         int aux_ref = ref1;
         ArrayList<Integer> aux_cont = this.fm.read(aux_ref);
         while(true) {
@@ -154,43 +127,18 @@ public class LinealHashDict implements Dictionary {
             aux_cont = this.fm.read(aux_ref);
         }
 
-        int ind = 0;
         aux_cont.clear();
-        ArrayList<Integer> cont_ref1 = this.fm.read(ref1);
-        while(true) {
-            if(aux_cont.size() == B - 2 || ind == content1.size()) {
-                if(aux_cont.size() == 0)
-                    break;
+        for(int i=0; i<content1.size(); i++) {
+            aux_cont.add(content1.get(i));
+            if(aux_cont.size() == B - 2 || i == content1.size() - 1) {
 
-                aux_cont.add(0, aux_cont.size());
-                if(aux_cont.get(0) == B - 2) {
-                    aux_cont.add(cont_ref1.get(B-1));
-                }
-                this.fm.write(aux_cont, ref1);
-                ref1 = cont_ref1.get(B-1);
-                cont_ref1 = this.fm.read(ref1);
-
-                continue;
             }
-            aux_cont.add(content1.get(ind));
-            ind++;
-        }
-
-        aux_cont.clear();
-        ArrayList<Integer> cont_ref2 = this.fm.read(ref2);
-        for(int i=0; i<content2.size(); i++) {
-
-        }
-
-        this.p++;
-        if(this.p == (1 << (this.t+1))) {
-            this.t++;
         }
     }
 
-    // inserta un elemento en el diccionario (completo, falta terminar expand).
+    // inserta un elemento en el diccionario (completo, sin testear, falta terminar expand).
     public void put(DNA key, long value) {
-        int reference_page = this.getReferenc(key);
+        int reference_page = this.getReference(key);
         ArrayList<Integer> page_content = this.fm.read(reference_page);
 
         int cant_elements = page_content.get(0);
@@ -232,110 +180,79 @@ public class LinealHashDict implements Dictionary {
     // contrae estructura de hashing lineal (incompleto).
     private void compress() { }
 
-    // metodo para eliminar un elemento de un diccionario (posiblemente completo, falta terminar compress).
+    // metodo para eliminar un elemento de un diccionario (completo, sin testear, falta terminar compress).
     public void delete(DNA key){
-        // obtencion referencia a pagina y contenido de pagina objetivo.
-        // reference_page: referencia a la pagina donde esta key.
-        // page_content: bloque donde deberia esta la key buscada.
-        int reference_page = this.getReferenc(key);
-        ArrayList<Integer> page_content = this.fm.read(reference_page);
+        int reference_page = this.getReference(key);
+        ArrayList<Integer> content = this.fm.read(reference_page);
 
-        // colocar caso en que la pagina ya esta llena, por lo que es necesario buscar en el siguiente bloque.
-        // un bloque contiene los elementos, un numero (cantidad de elementos) y (posiblemente) una referencia.
-        int cant_elements = page_content.get(0);
-        boolean res = false, same_block = true;
-        int pos_chain_to_delete = 0;
+        int last_page = reference_page, last_chain = 0;
+        ArrayList<Integer> last_content = content, search_content, new_content = new ArrayList<>();
+
+        // last_block: referencia al ultimo bloque.
+        // search_block: referencia al bloque con el elemento buscado.
+        int last_block = reference_page, search_block = -1, search_pos = -1;
+
         while(true) {
-            for(int i=1; i<=cant_elements; i++) {
-                if(key.hashCode() == page_content.get(i)) {
-                    pos_chain_to_delete = i;
-                    res = true;
+            if(search_block == -1) {
+                for (int i = 1; i <= last_content.get(0); i++) {
+                    if (last_content.get(i) == key.hashCode()) {
+                        search_pos = i;
+                        search_block = last_page;
+                        break;
+                    }
                 }
             }
 
-            if(res)
+            if(last_content.get(0) != 0) {
+                last_block = last_page;
+                last_chain = last_content.get(last_content.get(0));
+            }
+
+            if(last_content.get(0) != B - 2)
                 break;
 
-            if(cant_elements < B - 2)
-                break;
-
-            reference_page = page_content.get(B-1);
-            page_content = this.fm.read(reference_page);
-            cant_elements = page_content.get(0);
+            last_page = last_content.get(B-1);
+            last_content = this.fm.read(last_page);
         }
 
-        // page_content: bloque/pagina en la lista enlazada, que contiene la cadena que se estaba buscando.
-        // reference_page: referencia al bloque donde esta la cadena buscada.
+        if(search_block != -1) {
+            // se encontro el elemento buscado.
+            // search_block: referencia al bloque que contiene la buscado.
+            // last_block: referencia al ultimo bloque de la lista enlazada.
 
-        // si res == true, se encontro la cadena 'key' en algun bloque.
-        if(res) {
-            // se busca el ultimo bloque no vacio de la lista de bloques.
-            int last_reference_page = reference_page;
-            ArrayList<Integer> last_page_content = this.fm.read(last_reference_page);
-            int last_chain;
+            search_content = this.fm.read(search_block);
+            last_content = this.fm.read(last_block);
 
-            // last_chain es la cadena por la que se reemplazara la cadena borrada.
-            while(true) {
-                int cant_last_page = last_page_content.get(0);
-                ArrayList<Integer> change_page = new ArrayList<Integer>();
+            if(search_block == last_block) {
+                // elemento buscado estaba en la ultima pagina de la lista enlazada.
+                new_content.add(search_content.get(0) - 1);
+                for(int i=1; i<=search_content.get(0); i++) {
+                    if(i != search_pos)
+                        new_content.add(search_content.get(i));
 
-                if (0 < cant_last_page && cant_last_page < B - 2) {
-                    // cambio por ultima cadena
-                    last_chain = last_page_content.get(cant_last_page);
-                    change_page.add(cant_last_page - 1);
-                    for(int i=1; i<cant_last_page; i++)
-                        change_page.add(last_page_content.get(i));
-
-                    this.fm.write(change_page, last_reference_page);
-
-                    break;
                 }
 
-                int next_reference = last_page_content.get(B-1);
-                ArrayList<Integer> next_page_content = this.fm.read(next_reference);
-
-                if(next_page_content.get(0) == 0) {
-                    // cambio por ultima cadena.
-                    // en el caso de que el bloque tenga B-2 elementos, eliminar referencia a siguiente bloque en
-                    // la lista enlazada.
-                    // colocar referencia en bloques de referencias en desuso (usar funcion addReference).
-                    last_chain = last_page_content.get(cant_last_page);
-                    change_page.add(cant_last_page - 1);
-                    for(int i=1; i<cant_last_page; i++)
-                        change_page.add(last_page_content.get(i));
-
-                    this.addReference(1, last_page_content.get(B-1));
-
-                    this.fm.write(change_page, last_reference_page);
-
-                    break;
-                }
-                // same_block: con esto se determina si el elemento eliminado esta en el ultimo bloque de la
-                //             lista enlazada.
-                same_block = false;
-
-                last_reference_page = next_reference;
-                last_page_content = next_page_content;
-
-            }
-
-            // last_chain: ultima cadena en la lista enlazada.
-            // page_content: bloque/pagina que contiene la cadena que se estaba buscando.
-            // reference_page: referencia al bloque donde esta la cadena buscada.
-            // en caso de que la cadena a eliminar no es la ultima de la lista enlazada, hacer el cambio.
-            ArrayList<Integer> new_content = new ArrayList<Integer>();
-            if(!same_block && pos_chain_to_delete < last_page_content.get(0)) {
-                for(int i=1; i<=cant_elements; i++) {
-                    if(i == pos_chain_to_delete)
-                        new_content.add(last_chain);
+            } else {
+                // elemento buscado no esta en la ultima pagina de la lista enlazada.
+                new_content.add(search_content.get(0));
+                for(int i=1; i<=search_content.get(0); i++) {
+                    if(i != search_pos)
+                        new_content.add(search_content.get(i));
                     else
-                        new_content.add(page_content.get(i));
+                        new_content.add(last_chain);
+
                 }
 
-                this.fm.write(new_content, reference_page);
-            }
-            // en caso que no se cumpla if, ya se elimino el ultimo elemento dentro del while.
+                ArrayList<Integer> new_last_content = new ArrayList<>();
+                new_last_content.add(last_content.get(0) - 1);
+                for(int i=1; i<last_content.get(0); i++) {
+                    new_last_content.add(last_content.get(i));
 
+                }
+                this.fm.write(new_last_content, last_block);
+
+            }
+            this.fm.write(new_content, search_block);
         }
 
         /*
@@ -349,7 +266,7 @@ public class LinealHashDict implements Dictionary {
     // metodo que determina si un elemento se encuentra dentro del diccionario (listo)
     public boolean containsKey(DNA key){
         // obtencion de referencia y contenido de la pagina buscada.
-        int reference_page = this.getReferenc(key);
+        int reference_page = this.getReference(key);
         ArrayList<Integer> page_content = this.fm.read(reference_page);
 
         boolean res = false;
