@@ -4,6 +4,7 @@ import utils.DNA;
 import utils.FileManager;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class LinealHashDict implements Dictionary {
@@ -95,7 +96,7 @@ public class LinealHashDict implements Dictionary {
         return this.index_reference.get(page);
     }
 
-    // expande estructura de hashing lineal (inclompleto).
+    // expande estructura de hashing lineal (completo, sin testear).
     private void expand() {
         int ref_expand = this.last;
         this.index_reference.add(ref_expand);
@@ -131,12 +132,59 @@ public class LinealHashDict implements Dictionary {
         for(int i=0; i<content1.size(); i++) {
             aux_cont.add(content1.get(i));
             if(aux_cont.size() == B - 2 || i == content1.size() - 1) {
+                int cant = aux_cont.size();
+                aux_cont.add(0, cant);
+
+                ArrayList<Integer> last = new ArrayList<>();
+
+                if(cant == B - 2) {
+                    aux_cont.add(this.last);
+
+                    this.fm.write(aux_cont, ref1);
+                    last.add(0);
+                    this.fm.write(last, this.last);
+
+                    ref1 = this.last;
+                    this.last++;
+                } else {
+                    this.fm.write(aux_cont, ref1);
+                }
 
             }
         }
+
+        aux_cont.clear();
+        for(int i=0; i<content2.size(); i++) {
+            aux_cont.add(content2.get(i));
+            if(aux_cont.size() == B - 2 || i == content2.size() - 1) {
+                int cant = aux_cont.size();
+                aux_cont.add(0, cant);
+
+                ArrayList<Integer> last = new ArrayList<>();
+
+                if(cant == B - 2) {
+                    aux_cont.add(this.last);
+
+                    this.fm.write(aux_cont, ref2);
+                    last.add(0);
+                    this.fm.write(last, this.last);
+
+                    ref2 = this.last;
+                    this.last++;
+                } else {
+                    this.fm.write(aux_cont, ref2);
+                }
+            }
+        }
+
+        this.p++;
+        if(this.p == (1 << (this.t + 1))) {
+            this.t++;
+        }
+
     }
 
-    // inserta un elemento en el diccionario (completo, sin testear, falta terminar expand).
+    // inserta un elemento en el diccionario (completo, sin testear).
     public void put(DNA key, long value) {
         int reference_page = this.getReference(key);
         ArrayList<Integer> page_content = this.fm.read(reference_page);
@@ -178,7 +226,67 @@ public class LinealHashDict implements Dictionary {
     }
 
     // contrae estructura de hashing lineal (incompleto).
-    private void compress() { }
+    private void compress() {
+        int last_index = this.p;
+        ArrayList<Integer> last_cont = this.fm.read(last_index), content = new ArrayList<>();
+
+        while(true) {
+            for(int i=1; i<=last_cont.get(0); i++) {
+                content.add(last_cont.get(i));
+            }
+
+            if(last_cont.get(0) < B-2)
+                break;
+
+            last_index = last_cont.get(B - 1);
+            last_cont = this.fm.read(last_index);
+        }
+
+        int push_index = this.p % (1 << t);
+        ArrayList<Integer> push_cont = this.fm.read(push_index);
+        while(true) {
+            if(push_cont.size() == B) {
+                push_index = push_cont.get(B - 1);
+                push_cont = this.fm.read(push_index);
+
+            } else {
+                ArrayList<Integer> new_content = new ArrayList<>();
+                for(int i=1; i<=push_cont.get(0); i++) {
+                    new_content.add(push_cont.get(i));
+                }
+
+                for(int i=0; i<content.size(); i++) {
+                    new_content.add(content.get(i));
+                    if(new_content.size() == B - 2 || i == content.size() - 1) {
+                        int cant = new_content.size();
+                        new_content.add(0, cant);
+
+                        ArrayList<Integer> last = new ArrayList<>();
+
+                        if(cant == B - 2) {
+                            new_content.add(this.last);
+
+                            this.fm.write(new_content, push_index);
+                            last.add(0);
+                            this.fm.write(last, this.last);
+
+                            push_index = this.last;
+                            this.last++;
+                        } else {
+                            this.fm.write(new_content, push_index);
+                        }
+
+                    }
+                }
+                break;
+            }
+        }
+
+        this.p--;
+        if(this.p < (1 << this.t)) {
+            this.t--;
+        }
+    }
 
     // metodo para eliminar un elemento de un diccionario (completo, sin testear, falta terminar compress).
     public void delete(DNA key){
