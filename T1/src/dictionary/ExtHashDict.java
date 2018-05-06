@@ -243,33 +243,23 @@ public class ExtHashDict implements Dictionary {
         ArrayList<Integer> content = this.fm.read(reference_page);
 
         int last_page = reference_page, last_chain = 0;
-        ArrayList<Integer> last_content = content;
+        ArrayList<Integer> last_content = content, search_content;
 
         int total_elements = 0, altura = actual_node.getAltura();
 
         // last_block: referencia al ultimo bloque.
         // search_block: referencia al bloque con el elemento buscado.
-        int last_block = reference_page, search_block = -1;
-        ArrayList<Integer> new_content = new ArrayList<>();
+        int last_block = reference_page, search_block = -1, search_pos = -1;
+
         while(true) {
             total_elements += last_content.get(0);
             if(search_block == -1) {
-                int i = 1;
-                for (; i <= last_content.get(0); i++) {
+                for (int i = 1; i <= last_content.get(0); i++) {
                     if (last_content.get(i) == key.hashCode()) {
+                        search_pos = i;
                         search_block = last_page;
                         break;
                     }
-                }
-
-                if(search_block != -1) {
-                    new_content.add(last_content.get(0) - 1);
-                    for(int j=1; j<= last_content.get(0); j++) {
-                        if(j != i)
-                            new_content.add(last_content.get(j));
-                    }
-
-                    this.fm.write(new_content, search_block);
                 }
             }
 
@@ -285,33 +275,49 @@ public class ExtHashDict implements Dictionary {
             last_content = this.fm.read(last_page);
         }
 
-        // colocar el ultimo elemento de la lista de paginas, en la posicion del elemento eliminado
-        if(last_block != search_block) {
+        ArrayList<Integer> new_content = new ArrayList<>();
+        if(search_block != -1) {
+            // se encontro el elemento buscado.
+            // search_block: referencia al bloque que contiene la buscado.
+            // last_block: referencia al ultimo bloque de la lista enlazada.
+
+            search_content = this.fm.read(search_block);
             last_content = this.fm.read(last_block);
-            ArrayList<Integer> aux = new ArrayList<>();
 
-            aux.add(last_content.get(0) - 1);
-            for(int i=1; i<last_content.get(0); i++) {
-                aux.add(last_content.get(i));
+            if(search_block == last_block) {
+                // elemento buscado estaba en la ultima pagina de la lista enlazada.
+                new_content.add(search_content.get(0) - 1);
+                for(int i=1; i<=search_content.get(0); i++) {
+                    if(i != search_pos)
+                        new_content.add(search_content.get(i));
+
+                }
+
+            } else {
+                // elemento buscado no esta en la ultima pagina de la lista enlazada.
+                new_content.add(search_content.get(0));
+                for(int i=1; i<=search_content.get(0); i++) {
+                    if(i != search_pos)
+                        new_content.add(search_content.get(i));
+                    else
+                        new_content.add(last_chain);
+
+                }
+
+                ArrayList<Integer> new_last_content = new ArrayList<>();
+                new_last_content.add(last_content.get(0) - 1);
+                for(int i=1; i<last_content.get(0); i++) {
+                    new_last_content.add(last_content.get(i));
+
+                }
+                this.fm.write(new_last_content, last_block);
+
             }
-            if(last_content.get(0) == B-2) {
-                // colocar referencia en bloque de desuso.
-            }
-            aux.clear();
-
-            this.fm.write(aux, last_block);
-
-            last_content = this.fm.read(search_block);
-            aux.add(last_content.get(0) + 1);
-            for(int i=1; i<=last_content.get(0); i++) {
-                aux.add(last_content.get(i));
-            }
-            aux.add(last_chain);
-
-            this.fm.write(aux, search_block);
+            this.fm.write(new_content, search_block);
         }
 
-        // se lleno la pagina y aun no se llega al final del hashing.
+        // la pagina contiene pocos elementos, y no es parte del primer nodo
+
         if(total_elements < (B - 2) / 2 && search_block != -1 && 0 < altura){
             this.compress(actual_node);
         }
