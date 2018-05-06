@@ -31,7 +31,7 @@ public class Main {
         File fd = new File(pathname);
         //System.out.println(fd.getAbsolutePath());
         FileManager fm = new FileManager(B, fd);
-        Dictionary btree = new BTreeDict(pathname, B);
+        Dictionary btree = new BTreeDict(pathname, B, false);
 
         /*Tester.test0(fm, dna_array, 0, B, 0);
         Tester.test0(fm, dna_array, B, 3*B/2, 1);
@@ -42,7 +42,7 @@ public class Main {
         L.add(dna_array.get(5*B).hashCode());
         fm.append(L);*/
 
-        int n = 10000;
+        int n = (int) CHAINS/2;
         Tester.test1(btree, dna_array, n);
 
     }
