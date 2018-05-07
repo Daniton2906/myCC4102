@@ -14,7 +14,7 @@ import java.util.Comparator;
 public class Main {
 
     static final private long CHAINS = (long) Math.pow(2, 20);
-    static final private int B = 5;
+    static final private int B = 512;
     static final private String btree_filename = "/T1/tmp/btree_data.ser";
 
     public static void main (String [ ] args) {
@@ -42,8 +42,8 @@ public class Main {
         L.add(dna_array.get(5*B).hashCode());
         fm.append(L);*/
 
-        int n = (int) CHAINS/2;
-        Tester.test1(btree, dna_array, 25);
+        int n = (int) CHAINS/32;
+        Tester.test1(btree, dna_array, n);
 
     }
 }

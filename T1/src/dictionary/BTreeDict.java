@@ -279,7 +279,6 @@ public class BTreeDict implements Dictionary {
             BTreeNode father_node = visited_nodes.get(n_k); // referencia a nodo padre
             int n = father_node.getKeys().size(), // numero de claves en nodo padre
                     v_i = v_k == n ? v_k - 1 : v_k + 1; // se revisa hoja vecina anterior o siguiente
-            if (debug) System.out.println("Vecino v_i: " + v_i + " de vecino v_k " + v_k + " (" + n + ")");
             int v_offset = father_node.getPointers().get(v_i),
                     v_min = Math.min(v_k, v_i); // referencia al menor indicee
             values = fm.read(v_offset, true); in_counter++; // leer valores de hoja vecina
@@ -401,7 +400,7 @@ public class BTreeDict implements Dictionary {
                             new_node.add(second_node.getKeys().get(i).hashCode());
                             new_node.add(second_node.getPointers().get(i + 1));
                         }
-                        fm.write(new_node, current_node.getOffset(), true); size-=4; used_blocks--;
+                        fm.write(new_node, current_node.getOffset(), true); size-=8; used_blocks--;
                         if (debug) System.out.println("Joining nodes " + current_node.getOffset()
                                 + " and " + v_offset + " in node: " + current_node.getOffset()
                                 + " with new blocksize: " + new_node.size());
@@ -418,15 +417,17 @@ public class BTreeDict implements Dictionary {
                     if (debug) System.out.println("Raiz " + this.offset_raiz
                             + " without keys, node " + current_node.getPointers().get(0)
                             + " become the new raiz with blocksize: " + current_node.getBlocksize());
-                    this.offset_raiz = current_node.getPointers().get(0); used_blocks--;
+                    this.offset_raiz = current_node.getPointers().get(0); size-=4; used_blocks--;
                 }
                 fm.write(current_node.getIntValues(), current_node.getOffset(), true); out_counter++;
             }
         }
         else { //si no hay escasez, se actualiza hoja
             //si ya no quedan elementos en la raiz (tiene que serlo), arbol esta vacio
-            if(leaf.getBlocksize() == 0)
+            if(leaf.getBlocksize() == 0) {
                 this.offset_raiz = -1;
+                used_blocks--;
+            }
             // si no es la raiz, entonces no hay escasez
             // entonces solo se actualiza hoja
             fm.write(leaf.getIntValues(), leaf.getOffset(), false); out_counter++;
@@ -441,7 +442,7 @@ public class BTreeDict implements Dictionary {
     public int getIOs(){return in_counter + out_counter;}
 
     public int getUsedSpace(){
-        System.out.println("Espacio usado: " + (size + 4 * used_blocks) + ", bloques usados: " + used_blocks);
+        if(debug) System.out.println("Espacio usado: " + (size) + ", bloques usados: " + used_blocks);
         if(this.offset_raiz == -1)
             return 0;
         return size / used_blocks + 4;}

@@ -31,40 +31,46 @@ public class Tester {
         System.out.println("Insertando " + n + " claves");
         for (DNA dna: L)
             dict.put(dna, 0);
+        System.out.println("Cantidad de I/Os promedio: " + dict.getIOs()/n);
         System.out.println("Buscando mismas claves insertadas");
+        dict.resetIOCounter();
         int cnt = 0;
         for (DNA dna: L)
             if(dict.containsKey(dna))
                 cnt++;
         System.out.println("Encontradas " + cnt + " claves");
+        System.out.println("Cantidad de I/Os promedio: " + dict.getIOs()/n);
         System.out.println("Bytes usado por bloque: " + dict.getUsedSpace());
         try {
         TimeUnit.SECONDS.sleep(10);
         } catch (Exception e){System.out.println("pium");}
+        dict.resetIOCounter();
         System.out.println("Borrando " + n + " claves");
         for (DNA dna: L)
             dict.delete(dna);
+        System.out.println("Cantidad de I/Os promedio: " + dict.getIOs()/n);
         System.out.println("Buscando claves borradas");
+        dict.resetIOCounter();
         cnt = 0;
         for (DNA dna: L)
             if(dict.containsKey(dna))
                 cnt++;
         System.out.println("Encontradas " + cnt + " claves");
+        System.out.println("Cantidad de I/Os promedio: " + dict.getIOs()/n);
         System.out.println("Bytes usado por bloque: " + dict.getUsedSpace());
         System.out.println("##############################");
-
     }
 
     static public void test2(Dictionary dict, ArrayList<DNA> chain_array, DataGenerator dg){
         ArrayList<Integer> checkpoints = new ArrayList<>();
-        for(int k = FROM_I_EXP; k <= TO_I_EXP; k++)
-            checkpoints.add((int) Math.pow(2, k));
+        for(int i = FROM_I_EXP; i <= TO_I_EXP; i++)
+            checkpoints.add((int) Math.pow(2, i));
 
         int size = (int) Math.pow(2, TO_I_EXP);
         ArrayList<ArrayList<Integer>> results = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            dict.put(chain_array.get(i), 0);
-            if(checkpoints.contains(i + 1)) {
+        for (int k = 0; k < size; k++) {
+            dict.put(chain_array.get(k), 0);
+            if(checkpoints.contains(k + 1)) {
                 ArrayList<Integer> tmp = new ArrayList<>();
                 tmp.add(dict.getUsedSpace());
                 tmp.add(dict.getIOs());
@@ -82,14 +88,30 @@ public class Tester {
             }
         }
         checkpoints.remove(size);
+        int w = results.size() - 2;
+        int totalIOs = 0;
         for (int i = size - 1; i >= 0; i--) {
             dict.delete(chain_array.get(i));
             if(checkpoints.contains(i + 1)) {
-
+                results.get(w).add(dict.getUsedSpace());
+                results.get(w).add(dict.getIOs());
+                totalIOs += dict.getIOs();
+                dict.resetIOCounter();
             }
         }
-        System.out.println("### Report ###");
-
-
+        totalIOs += dict.getIOs();
+        results.get(results.size() - 1).add(dict.getIOs());
+        results.get(results.size() - 1).add(totalIOs);
+        dict.resetIOCounter();
+        checkpoints.add(size);
+        System.out.println("############################## REPORT ###########################################################");
+        System.out.println("i \t 2^i \t space_put \t ios_put \t ios_search_in \t ios_search_out \t space_delete \t ios_delete");
+        for(int i = 0; i <= results.size(); i++){
+            ArrayList<Integer> tmp = results.get(i);
+            System.out.print((FROM_I_EXP + i) + "\t" + checkpoints.get(i));
+            for(int num: tmp)
+                System.out.print("\t" + num);
+            System.out.println("");
+        }
     }
 }
