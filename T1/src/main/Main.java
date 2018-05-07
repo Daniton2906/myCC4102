@@ -18,25 +18,31 @@ public class Main {
     static final private long CHAINS = (long) Math.pow(2, 20);
     static final private int B = 512;
     static final private String btree_filename = "/T1/tmp/btree_data.ser";
+    static final private String exth_filename = "/T1/tmp/exth_data.ser";
+    static final private String linh0_filename = "/T1/tmp/linh0_data.ser";
+    static final private String linh1_filename = "/T1/tmp/linh1_data.ser";
 
     public static void main (String [ ] args) throws IOException {
         System.out.println("Empezamos la ejecución del programa");
 
-        DataGenerator rand_data_gen = new DataGenerator();
+        DataGenerator rand_data_gen = new DataGenerator(10);
         long start = System.currentTimeMillis();
         ArrayList<DNA> dna_array = rand_data_gen.generateRandomChains(CHAINS);
         long end = System.currentTimeMillis();
         System.out.println("Tiempo para crear " + CHAINS + " cadenas: " + (end - start));
 
-        String pathname = System.getProperty("user.dir") + btree_filename;
+        String pathname_btree = System.getProperty("user.dir") + btree_filename;
+        String pathname_exth = System.getProperty("user.dir") + exth_filename;
+        String pathname_linh0 = System.getProperty("user.dir") + linh0_filename;
+        String pathname_linh1 = System.getProperty("user.dir") + linh1_filename;
 
-        File fd = new File(pathname);
+        //File fd = new File(pathname_btree);
         //System.out.println(fd.getAbsolutePath());
-        FileManager fm = new FileManager(B, fd);
-        Dictionary btree = new BTreeDict(pathname, B, false);
-        Dictionary exth = new ExtHashDict(pathname, B, false);
-        Dictionary linh0 = new LinealHashDict(pathname, B, 0, true);
-        Dictionary linh1 = new LinealHashDict(pathname, B, 1, false);
+        //FileManager fm = new FileManager(B, fd);
+        //Dictionary btree = new BTreeDict(pathname, B, false);
+        Dictionary exth = new ExtHashDict(pathname_exth, B, false);
+        Dictionary linh0 = new LinealHashDict(pathname_linh0, B, 0, true);
+        Dictionary linh1 = new LinealHashDict(pathname_linh1, B, 1, false);
 
         /*Tester.test0(fm, dna_array, 0, B, 0);
         Tester.test0(fm, dna_array, B, 3*B/2, 1);
@@ -49,11 +55,14 @@ public class Main {
 
         int n = (int) CHAINS/32;
         //Tester.test1(btree, dna_array, n);
-        //Tester.test2(btree, dna_array, rand_data_gen, "btree");
-        Tester.test2(exth, dna_array, rand_data_gen, "hashing extensible");
-        Tester.test2(linh0, dna_array, rand_data_gen, "hashing lineal");
-        Tester.test2(linh1, dna_array, rand_data_gen, "hashing lineal");
-
+        int n_test= 10;
+        for(int i = 0; i< n_test; i++) {
+            Dictionary btree = new BTreeDict(pathname_btree, B, false);
+            Tester.test2(btree, dna_array, rand_data_gen, "btree" + i + "-");
+        }
+        //Tester.test2(exth, dna_array, rand_data_gen);
+        //Tester.test2(linh0, dna_array, rand_data_gen);
+        //Tester.test2(linh1, dna_array, rand_data_gen);
 
     }
 }
