@@ -49,10 +49,10 @@ public class Main {
 
         int n = (int) CHAINS/32;
         //Tester.test1(btree, dna_array, n);
-        Tester.test2(btree, dna_array, rand_data_gen, "btree");
-        //Tester.test2(exth, dna_array, rand_data_gen);
-        //Tester.test2(linh0, dna_array, rand_data_gen);
-        //Tester.test2(linh1, dna_array, rand_data_gen);
+        //Tester.test2(btree, dna_array, rand_data_gen, "btree");
+        Tester.test2(exth, dna_array, rand_data_gen, "hashing extensible");
+        Tester.test2(linh0, dna_array, rand_data_gen, "hashing lineal");
+        Tester.test2(linh1, dna_array, rand_data_gen, "hashing lineal");
 
 
     }

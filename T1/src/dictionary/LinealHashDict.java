@@ -232,13 +232,15 @@ public class LinealHashDict implements Dictionary {
         }
 
         int cant_elements = page_content.get(0);
-        int total_elements = cant_elements;
+        int total_elements = cant_elements, prom_acces = cant_elements, mult = 2;
         while(cant_elements == B - 2) {
             reference_page = page_content.get(B-1);
             page_content = this.fm.read(reference_page); this.in_counter++;
             cant_elements = page_content.get(0);
 
             total_elements += cant_elements;
+            prom_acces += (cant_elements * mult);
+            mult++;
 
             if(this.debug)
                 System.out.println("LinealHash::put >> pagina llena, cambiando referencia por " + reference_page);
@@ -273,13 +275,14 @@ public class LinealHashDict implements Dictionary {
             }
         }
         total_elements++;
+        prom_acces += (mult - 1);
         this.fm.write(new_content, reference_page); this.out_counter++;
 
 
         // caso en que se cumple condicion de expansion.
         if(this.debug)
             System.out.println("LinealHash::put >> cantidad de elementos en lista: " + total_elements);
-        if(total_elements >= 3*B/2 && this.type == 0){
+        if((total_elements >= 3*B/2 && this.type == 0) || ((1.0*prom_acces)/total_elements > 2 && this.type == 1)){
             if(this.debug)
                 System.out.println("LinealHash::put >> cumple condicion de expancion");
             expand();
@@ -402,7 +405,7 @@ public class LinealHashDict implements Dictionary {
         // last_block: referencia al ultimo bloque.
         // search_block: referencia al bloque con el elemento buscado.
         int last_block = reference_page, search_block = -1, search_pos = -1;
-        int total_elements = 0;
+        int total_elements = 0, prom_acces = 0, mult = 1;
         while(true) {
             if(this.debug)
                 System.out.println("LinealHash::delete >> busqueda en pagina " + last_page);
@@ -419,6 +422,8 @@ public class LinealHashDict implements Dictionary {
                 }
             }
             total_elements += last_content.get(0);
+            prom_acces += (last_content.get(0) * mult);
+            mult++;
 
             if(last_content.get(0) != 0) {
                 last_block = last_page;
@@ -493,7 +498,7 @@ public class LinealHashDict implements Dictionary {
         if(this.debug)
             System.out.println("LinealHash::put >> cantidad de elementos en lista: " + total_elements);
 
-        if(total_elements >= 3*B/2 && this.type == 0){
+        if((total_elements >= 3*B/2 && this.type == 0) || ((1.0*prom_acces)/total_elements <= 2 && this.type == 1) ){
             if(this.debug)
                 System.out.println("LinealHash::put >> cumple condicion de compresion");
 
