@@ -12,8 +12,8 @@ import java.util.concurrent.TimeUnit;
 
 public class Tester {
 
-    static final private int FROM_I_EXP = 14;
-    static final private int TO_I_EXP = 15;
+    static final private int FROM_I_EXP = 15;
+    static final private int TO_I_EXP = 20;
 
     static public void test0(FileManager fm, ArrayList<DNA> dna_array, int from, int to, int b_offset) {
 
