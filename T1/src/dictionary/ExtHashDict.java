@@ -74,36 +74,39 @@ public class ExtHashDict implements Dictionary {
         id.add(0);
         this.fm.write(id, 0);
 
-        //id = this.fm.read(1);
-
-        /*
-        System.out.println(id.size());
-        for(int i=0; i<id.size(); i++)
-            System.out.println("  " + id.get(i));
-        */
-
-        //this.fm.write(id, 0);
-
     }
 
     // retorna nodo al que esta asociado a la pagina buscada segun el hash (completo, sin testear).
     private Node getReference(DNA key) {
         int hash = key.hashCode();
+        if(this.debug)
+            System.out.println("ExtHash::getReference >> buscando: " + hash);
 
         Node actual_node = this.tree_reference;
         int shift = 0;
-        while(!actual_node.hasReference()) {
-            if(shift >= 30)
-                break;
+        if(this.debug)
+            System.out.println("ExtHash::getReference >> camino en el arbol:");
 
-            if((hash & (1 << shift)) != 0) {
-                actual_node = this.tree_reference.getLeftNode();
+        while(!actual_node.hasReference()) {
+            if(shift >= 30) {
+                if(this.debug)
+                    System.out.println("ExtHash::getReference >> limite de busqueda");
+                break;
+            }
+
+            if(this.debug)
+                System.out.println("  " + (hash & (1 << shift)));
+
+            if((hash & (1 << shift)) == 0) {
+                actual_node = actual_node.getLeftNode();
             } else {
-                actual_node = this.tree_reference.getRightNode();
+                actual_node = actual_node.getRightNode();
             }
             shift++;
 
         }
+        if(this.debug)
+            System.out.println("ExtHash::getReference >> fin de busqueda");
 
         return actual_node;
 
@@ -112,7 +115,16 @@ public class ExtHashDict implements Dictionary {
     // metodo de duplicacion de nodos (completo, falta testear).
     private void duplicate(Node nodo) {
         int reference_page = nodo.getReference();
+        if(this.debug)
+            System.out.println("ExtHash::duplicate >> duplicando nodo con referencia " + reference_page);
+
         ArrayList<Integer> content = this.fm.read(reference_page);
+        if(this.debug) {
+            System.out.println("ExtHash::duplicate >> contenido de la pagina:");
+            for(int i=1; i<content.get(0); i++) {
+                System.out.println("  " + content.get(i));
+            }
+        }
 
         int shift = nodo.getAltura();
         nodo.activateReference(false);
@@ -139,6 +151,20 @@ public class ExtHashDict implements Dictionary {
         this.fm.write(right, this.last);
         Node r = new Node(this.last); this.last++;
         r.setAltura(shift + 1);
+
+        if(this.debug) {
+            System.out.println("ExtHash::duplicate >> contentido de paginas duplicadas(left), ref: " + reference_page);
+            for(int i=0; i<left.size(); i++) {
+                System.out.println("  " + left.get(i));
+            }
+        }
+
+        if(this.debug) {
+            System.out.println("ExtHash::duplicate >> contentido de paginas duplicadas(right), ref: " + (this.last - 1));
+            for(int i=0; i<right.size(); i++) {
+                System.out.println("  " + right.get(i));
+            }
+        }
 
         nodo.addLeftNode(l);
         nodo.addRightNode(r);
@@ -171,7 +197,6 @@ public class ExtHashDict implements Dictionary {
     * Test: inserciones                             (testeado)
     *       insercion + duplicacion
     * */
-
     public void put(DNA key, long value) {
         if(this.debug)
             System.out.println("ExtHash::put >> insertando cadena: " + key.toString() + ", hashCode: " + key.hashCode());
@@ -242,7 +267,7 @@ public class ExtHashDict implements Dictionary {
         }
 
         // se lleno la pagina y aun no se llega al final del hashing.
-        if(total_elements >= B - 2 && altura < 30 && false){
+        if(total_elements >= B - 2 && altura < 30){
             if(this.debug)
                 System.out.println("ExtHash::put >> limite de pagina, iniciando duplicacion");
 
@@ -262,9 +287,14 @@ public class ExtHashDict implements Dictionary {
 
         int right_reference = right.getReference();
         ArrayList<Integer> right_content = this.fm.read(right_reference);
+        if(this.debug)
+            System.out.println("ExtHash::compress >> hay " + (right_content.get(0) + left_content.get(0)) + " elementos, de un maximo de " + this.B);
 
         // en caso de que sea posible juntar las paginas.
         if(right_content.get(0) + left_content.get(0) < B-2) {
+            if(this.debug)
+                System.out.println("ExtHash::compress >> ambas paginas se pueden fusionar");
+
             ArrayList<Integer> new_content = new ArrayList<>();
             new_content.add(right_content.get(0) + left_content.get(0));
 
@@ -320,6 +350,7 @@ public class ExtHashDict implements Dictionary {
                             System.out.println("ExtHash::delete >> cadena " + key.hashCode() + " encontrada");
                         search_pos = i;
                         search_block = last_page;
+                        total_elements--;
                         break;
                     }
                 }
@@ -384,6 +415,8 @@ public class ExtHashDict implements Dictionary {
         // la pagina contiene pocos elementos, y no es parte del primer nodo
 
         if(total_elements < (B - 2) / 2 && search_block != -1 && 0 < altura){
+            if(this.debug)
+                System.out.println("ExtHash::delete >> limite de pagina, iniciando compresion");
             this.compress(actual_node);
         }
 
@@ -392,6 +425,9 @@ public class ExtHashDict implements Dictionary {
     // retorna true si la cadena de DNA se encuentra en el diccionario (completo, falta testear).
     public boolean containsKey(DNA key){
         Node actual_node = this.getReference(key);
+
+        if(this.debug)
+            System.out.println("ExtHash::containsKey >> buscando cadena: " + key.toString() + ", hashCode: " + key.hashCode());
 
         int reference_page = actual_node.getReference(), hash = key.hashCode();
         ArrayList<Integer> content = this.fm.read(reference_page);
@@ -417,6 +453,8 @@ public class ExtHashDict implements Dictionary {
             content = this.fm.read(reference_page);
 
         }
+        if(this.debug)
+            System.out.println("ExtHash::containsKey >> cadena encontrada: " + res);
 
         return res;
     }

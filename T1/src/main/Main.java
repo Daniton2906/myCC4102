@@ -1,6 +1,8 @@
 package main;
 
 import dictionary.BTreeDict;
+import dictionary.ExtHashDict;
+import dictionary.LinealHashDict;
 import dictionary.Dictionary;
 import utils.DNA;
 import utils.DataGenerator;
@@ -32,6 +34,8 @@ public class Main {
         //System.out.println(fd.getAbsolutePath());
         FileManager fm = new FileManager(B, fd);
         Dictionary btree = new BTreeDict(pathname, B, false);
+        Dictionary exth = new ExtHashDict(pathname, B, false);
+        Dictionary linh = new LinealHashDict(pathname, B, 0);
 
         /*Tester.test0(fm, dna_array, 0, B, 0);
         Tester.test0(fm, dna_array, B, 3*B/2, 1);
