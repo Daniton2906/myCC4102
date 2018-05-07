@@ -44,7 +44,8 @@ public class Main {
 
         int n = (int) CHAINS/32;
         //Tester.test1(btree, dna_array, n);
-        Tester.test2(btree, dna_array, rand_data_gen);
+        for(int i = 0; i < 10; i++)
+            Tester.test2(btree, dna_array, rand_data_gen);
 
     }
 }

@@ -91,7 +91,7 @@ public class Tester {
                 results.add(tmp);
             }
         }
-        checkpoints.remove(size);
+        checkpoints.remove(checkpoints.size() - 1);
         int w = results.size() - 2;
         int totalIOs = 0;
         for (int k = size - 1; k >= 0; k--) {
