@@ -60,7 +60,7 @@ public class ExtHashDict implements Dictionary {
 
     private boolean debug;
     private int in_counter, out_counter;
-    private ArrayList<Integer> droped_blocks;
+    private int in_use_block, memory;
 
     // una pagina es equivalente a un bloque.
     public ExtHashDict(String filename, int B, boolean debug) {
@@ -75,13 +75,12 @@ public class ExtHashDict implements Dictionary {
 
         this.in_counter = 0;
         this.out_counter = 0;
-
-        this.droped_blocks = new ArrayList<>();
+        this.in_use_block = 0;
+        this.memory = 0;
 
         ArrayList<Integer> id = new ArrayList<>();
         id.add(0);
         this.fm.write(id, 0); this.out_counter++;
-
     }
 
     // retorna nodo al que esta asociado a la pagina buscada segun el hash (completo, sin testear).
@@ -148,7 +147,6 @@ public class ExtHashDict implements Dictionary {
                 right.add(chain);
             }
         }
-        this.droped_blocks.add(content.get(B-1));
 
         left.add(0, left.size());
         right.add(0, right.size());
@@ -157,22 +155,8 @@ public class ExtHashDict implements Dictionary {
         Node l = new Node(reference_page);
         l.setAltura(shift + 1);
 
-        int unused_reference;
-        if(this.droped_blocks.size() != 0) {
-            unused_reference = droped_blocks.get(0);
-            ArrayList<Integer> aux = droped_blocks; droped_blocks.clear();
-
-            for(int i=0; i<aux.size() - 1; i++)
-                droped_blocks.add(aux.get(i));
-
-            this.last--;
-
-        } else {
-            unused_reference = this.last;
-        }
-
-        this.fm.write(right, unused_reference); this.out_counter++;
-        Node r = new Node(unused_reference); this.last++;
+        this.fm.write(right, this.last); this.out_counter++;
+        Node r = new Node(this.last); this.last++;
         r.setAltura(shift + 1);
 
         if(this.debug) {
@@ -256,25 +240,12 @@ public class ExtHashDict implements Dictionary {
                 new_content.add(key.hashCode());
 
                 if(new_content.get(0) == B-2) {
-                    int unused_reference;
-                    if(this.droped_blocks.size() != 0) {
-                        unused_reference = droped_blocks.get(0);
-                        ArrayList<Integer> aux = droped_blocks; droped_blocks.clear();
+                    new_content.add(this.last);
 
-                        for(int i=0; i<aux.size() - 1; i++)
-                            droped_blocks.add(aux.get(i));
+                    ArrayList<Integer> last = new ArrayList<>();
+                    last.add(0);
+                    this.fm.write(last, this.last); this.out_counter++;
 
-                        this.last--;
-
-                    } else {
-                        unused_reference = this.last;
-
-                        ArrayList<Integer> last = new ArrayList<>();
-                        last.add(0);
-                        this.fm.write(last, this.last); this.out_counter++;
-                    }
-
-                    new_content.add(unused_reference);
                     this.last++;
 
                 }
@@ -394,9 +365,6 @@ public class ExtHashDict implements Dictionary {
             }
 
             if(last_content.get(0) != B - 2) {
-                if(last_content.get(0) == 0 && search_block != -1)
-                    this.droped_blocks.add(last_page);
-
                 break;
             }
 
@@ -496,9 +464,11 @@ public class ExtHashDict implements Dictionary {
         return res;
     }
 
-    public void resetIOCounter(){}
+    public void resetIOCounter(){
+        this.in_counter = 0; this.out_counter = 0;
+    }
 
-    public int getIOs(){return 0;}
+    public int getIOs(){return this.in_counter + this.out_counter;}
 
     public int getUsedSpace(){return 0;}
 }
