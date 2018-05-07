@@ -8,6 +8,11 @@ public class DataGenerator {
 
     private final int CHAIN_LENGTH = 15;
     private final char[] BASES = {'G', 'C', 'A', 'T'};
+    private final Random rand;
+
+    public DataGenerator(long seed) {
+        this.rand = new Random(seed);
+    }
 
     private DNA randomChain(Random rand) throws InvalidAttributeValueException{
         ArrayList<Character> tmp_chain = new ArrayList<>();
@@ -19,8 +24,6 @@ public class DataGenerator {
     }
 
     public ArrayList<DNA> generateRandomChains(long N) {
-        Random rand = new Random();
-        rand.setSeed(System.currentTimeMillis());
 
         ArrayList<DNA> dna_chains = new ArrayList<>();
         for (int i = 0; i < N; i++) {
@@ -35,8 +38,6 @@ public class DataGenerator {
     }
 
     public ArrayList<DNA> getRandomChunk(ArrayList<DNA> chains, int size) {
-        Random rand = new Random();
-        rand.setSeed(System.currentTimeMillis());
 
         ArrayList<DNA> sub_chains = new ArrayList<>();
         int n = 0;
@@ -48,8 +49,6 @@ public class DataGenerator {
     }
 
     public ArrayList<DNA> getOtherChunk(ArrayList<DNA> chains, int size) {
-        Random rand = new Random();
-        rand.setSeed(System.currentTimeMillis());
 
         ArrayList<DNA> sub_chains = new ArrayList<>();
         int n = 0;
