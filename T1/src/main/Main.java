@@ -2,6 +2,8 @@ package main;
 
 import dictionary.BTreeDict;
 import dictionary.Dictionary;
+import dictionary.ExtHashDict;
+import dictionary.LinealHashDict;
 import utils.DNA;
 import utils.DataGenerator;
 import utils.FileManager;
@@ -32,6 +34,9 @@ public class Main {
         //System.out.println(fd.getAbsolutePath());
         FileManager fm = new FileManager(B, fd);
         Dictionary btree = new BTreeDict(pathname, B, false);
+        Dictionary exth = new ExtHashDict(pathname, B, false);
+        Dictionary linh0 = new LinealHashDict(pathname, B, 0, true);
+        Dictionary linh1 = new LinealHashDict(pathname, B, 1, false);
 
         /*Tester.test0(fm, dna_array, 0, B, 0);
         Tester.test0(fm, dna_array, B, 3*B/2, 1);
@@ -44,8 +49,11 @@ public class Main {
 
         int n = (int) CHAINS/32;
         //Tester.test1(btree, dna_array, n);
-        for(int i = 0; i < 10; i++)
-            Tester.test2(btree, dna_array, rand_data_gen);
+        Tester.test2(btree, dna_array, rand_data_gen);
+        //Tester.test2(exth, dna_array, rand_data_gen);
+        //Tester.test2(linh0, dna_array, rand_data_gen);
+        //Tester.test2(linh1, dna_array, rand_data_gen);
+
 
     }
 }
