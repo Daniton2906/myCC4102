@@ -25,7 +25,7 @@ public class Main {
     public static void main (String [ ] args) throws IOException {
         System.out.println("Empezamos la ejecución del programa");
 
-        DataGenerator rand_data_gen = new DataGenerator(10);
+        DataGenerator rand_data_gen = new DataGenerator();
         long start = System.currentTimeMillis();
         ArrayList<DNA> dna_array = rand_data_gen.generateRandomChains(CHAINS);
         long end = System.currentTimeMillis();
