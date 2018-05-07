@@ -28,33 +28,6 @@ public class Tester {
 
     static public void test1(Dictionary dict, ArrayList<DNA> chain_array, int n){
         List<DNA> L = chain_array.subList(0, n); //new ArrayList<>(); //
-        /*
-        L.add(new DNA(0x1b132df8));
-        L.add(new DNA(0x6ef37fcc));
-        L.add(new DNA(0x6245e754));
-        L.add(new DNA(0xc674b72c));
-        L.add(new DNA(0xedc5e960));
-        L.add(new DNA(0x7d246850));
-        L.add(new DNA(0xf1e570dc));
-        L.add(new DNA(0x5a6fdb04));
-        L.add(new DNA(0xa01df00));
-        L.add(new DNA(0x488c4550));
-        L.add(new DNA(0x25bb090));
-        L.add(new DNA(0xa878c764));
-        L.add(new DNA(0x949aa428));
-        L.add(new DNA(0x4372724));
-        L.add(new DNA(0xb57515b0));
-        L.add(new DNA(0xd44863f8));
-        L.add(new DNA(0xcaeba780));
-        L.add(new DNA(0xd8f8ceec));
-        L.add(new DNA(0xa8bebfcc));
-        L.add(new DNA(0x2f7a1300));
-        L.add(new DNA(0xccd87bac));
-        L.add(new DNA(0xee3b1d00));
-        L.add(new DNA(0x1e2d4e24));
-        L.add(new DNA(0xce884520));
-        L.add(new DNA(0x1d7f6588));
-        */
         System.out.println("Insertando " + n + " claves");
         for (DNA dna: L)
             dict.put(dna, 0);
@@ -64,9 +37,10 @@ public class Tester {
             if(dict.containsKey(dna))
                 cnt++;
         System.out.println("Encontradas " + cnt + " claves");
-        /*try {
-        TimeUnit.SECONDS.sleep(5);
-        } catch (Exception e){System.out.println("pium");}*/
+        System.out.println("Bytes usado por bloque: " + dict.getUsedSpace());
+        try {
+        TimeUnit.SECONDS.sleep(10);
+        } catch (Exception e){System.out.println("pium");}
         System.out.println("Borrando " + n + " claves");
         for (DNA dna: L)
             dict.delete(dna);
@@ -76,6 +50,7 @@ public class Tester {
             if(dict.containsKey(dna))
                 cnt++;
         System.out.println("Encontradas " + cnt + " claves");
+        System.out.println("Bytes usado por bloque: " + dict.getUsedSpace());
         System.out.println("##############################");
 
     }

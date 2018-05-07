@@ -15,6 +15,10 @@ public class BTreeDict implements Dictionary {
     private int height;
     private int offset_raiz;
     private boolean debug;
+    private int in_counter = 0;
+    private int out_counter = 0;
+    private int size = 0;
+    private int used_blocks = 0;
 
     public BTreeDict(String filename, int B) {
         this(filename, B, false);
@@ -32,15 +36,15 @@ public class BTreeDict implements Dictionary {
         //si no hay ningun valor, solo se agrega un nuevo bloque hoja
         if(this.offset_raiz == -1) {
             ArrayList<Integer> first_leaf = new ArrayList<>();
-            first_leaf.add(key.hashCode());
-            this.offset_raiz = fm.append(first_leaf);
+            first_leaf.add(key.hashCode()); size+= 4;
+            this.offset_raiz = fm.append(first_leaf); out_counter++; used_blocks+= 1;
             if(debug) System.out.println("Updating leaf: " + this.offset_raiz + " with blocksize: " + first_leaf.size()
                     + "(" + Integer.toHexString(key.hashCode()) + ")");
             return;
         }
         int offset = offset_raiz;
         // leer considerando que bms del primer valor entrega tipo de nodo
-        ArrayList<Integer> values = fm.read(offset, true);
+        ArrayList<Integer> values = fm.read(offset, true); in_counter++;
         int isLeaf = (values.get(0) >> 31) & 0x1;
         ArrayList<BTreeNode> visited_nodes = new ArrayList<>();
         int h = 0;
@@ -59,14 +63,14 @@ public class BTreeDict implements Dictionary {
             }
             offset = node.getPointers().get(i); //guardar referencia de sgte nodo para ser leido
             //se revisa siguiente bloque
-            values = fm.read(offset, true);
+            values = fm.read(offset, true); in_counter++;
             isLeaf = (values.get(0) >> 31) & 0x1;
             visited_nodes.add(node); // mantener registro de nodos visitados
             h++;
         }
         // se agrega llave a hoja
         BTreeLeaf leaf = new BTreeLeaf(this.B, offset, values);
-        leaf.insert(key);
+        leaf.insert(key); size+= 4;
         if(debug) System.out.println("Updating leaf: " + leaf.getOffset() + " with blocksize: " + leaf.getBlocksize()
                 + "(" + Integer.toHexString(key.hashCode()) + ")");
         ArrayList<DNA> dnas = leaf.getValues(); // valores vienen ordenados
@@ -84,9 +88,9 @@ public class BTreeDict implements Dictionary {
             }
             // primera hoja se guarda en mismo bloque usado por hoja original
             int new_offset1 = offset;
-            fm.write(new_leaf1, new_offset1);
+            fm.write(new_leaf1, new_offset1); out_counter++;
             // segunda hoja se pone en el siguiente bloque libre en el archivo
-            int new_offset2 = fm.append(new_leaf2);
+            int new_offset2 = fm.append(new_leaf2); out_counter++;  used_blocks++;
             if(debug) System.out.println("Split leaf " + offset
                     + " into leaf " + new_offset1 + " with blocksize: " + new_leaf1.size()
                     + " and leaf " + new_offset2 + " with blocksize: " + new_leaf2.size());
@@ -108,7 +112,7 @@ public class BTreeDict implements Dictionary {
                     if(debug) System.out.println("Subir clave "
                         + Integer.toHexString(new_key.hashCode())
                         + "a bloque " + node.getOffset());
-                    node.insert(new_key, new_offset1, new_offset2);
+                    node.insert(new_key, new_offset1, new_offset2); size+= 8;
                     ArrayList<Integer> node_pointers = node.getPointers();
                     ArrayList<DNA> node_keys = visited_nodes.get(k).getKeys();
                     // dividir
@@ -132,9 +136,9 @@ public class BTreeDict implements Dictionary {
                     new_node2.add(node_pointers.get(node_keys.size())); //agregar ultima referencia
                     // primer nodo se guarda en mismo bloque usado por nodo original
                     new_offset1 = node.getOffset();
-                    fm.write(new_node1, new_offset1, true);
+                    fm.write(new_node1, new_offset1, true); out_counter++;
                     // segundo nodo se pone en el siguiente bloque libre en el archivo
-                    new_offset2 = fm.append(new_node2, true);
+                    new_offset2 = fm.append(new_node2, true); out_counter++;  used_blocks++;
                     if(debug) System.out.println("Split node " + node.getOffset()
                         + " into node " + new_offset1 + " with blocksize: " + new_node1.size()
                         + " and node " + new_offset2 + " with blocksize: " + new_node2.size());
@@ -154,26 +158,19 @@ public class BTreeDict implements Dictionary {
             // con una clave y dos referencias
             if(k < 0) {
                 ArrayList<Integer> new_node = new ArrayList<>();
-                new_node.add(new_offset1);
-                new_node.add(new_key.hashCode());
-                new_node.add(new_offset2);
+                new_node.add(new_offset1); size+= 4;
+                new_node.add(new_key.hashCode()); size+= 4;
+                new_node.add(new_offset2); size+= 4;
                 // nuevo nodo se pone en el siguiente bloque libre
-                this.offset_raiz = fm.append(new_node, true);
+                this.offset_raiz = fm.append(new_node, true); out_counter++;  used_blocks++;
                 if(debug) System.out.println("Adding new raiz: "
                         + this.offset_raiz + " with blocksize: " + new_node.size()
                         + "(" + Integer.toHexString(new_key.hashCode()) + ")");
             } else { // si no, solo se tiene que insertar nueva clave y referencias en nodo
-                node.insert(new_key, new_offset1, new_offset2);
-                ArrayList<Integer> node_pointers = node.getPointers();
-                ArrayList<DNA> node_keys = visited_nodes.get(k).getKeys();
-                ArrayList<Integer> new_node = new ArrayList<>();
-                for(int j = 0; j < node_keys.size(); j++) {
-                    new_node.add(node_pointers.get(j));
-                    new_node.add(node_keys.get(j).hashCode());
-                }
-                new_node.add(node_pointers.get(node_keys.size()));
+                node.insert(new_key, new_offset1, new_offset2); size+= 8;
+                ArrayList<Integer> new_node = node.getIntValues();
                 //se escribe nodo actualizado en bloque donde estaba
-                fm.write(new_node, node.getOffset(), true);
+                fm.write(new_node, node.getOffset(), true); out_counter++;
                 if(debug) System.out.println("Updating node: " + node.getOffset()
                         + " with blocksize: " + new_node.size()
                         + "(" + Integer.toHexString(new_key.hashCode()) + ")");
@@ -183,7 +180,7 @@ public class BTreeDict implements Dictionary {
             ArrayList<Integer> new_leaf = new ArrayList<>();
             for(DNA dna: dnas)
                 new_leaf.add(dna.hashCode());
-            fm.write(new_leaf, leaf.getOffset(), false);
+            fm.write(new_leaf, leaf.getOffset(), false); out_counter++;
         }
     }
 
@@ -193,7 +190,7 @@ public class BTreeDict implements Dictionary {
             return false;
         int offset = offset_raiz;
         // leer considerando que bms del primer valor entrega tipo de nodo
-        ArrayList<Integer> values = fm.read(offset, true);
+        ArrayList<Integer> values = fm.read(offset, true); in_counter++;
         int isLeaf = (values.get(0) >> 31) & 0x1;
         int h = 0;
         // Buscar hoja bajando por nodos correspondiente
@@ -211,7 +208,7 @@ public class BTreeDict implements Dictionary {
             }
             offset = node.getPointers().get(i); //guardar referencia de sgte nodo para ser leido
             //se revisa siguiente bloque
-            values = fm.read(offset, true);
+            values = fm.read(offset, true); in_counter++;
             isLeaf = (values.get(0) >> 31) & 0x1;
             h++;
         }
@@ -237,7 +234,7 @@ public class BTreeDict implements Dictionary {
         }
         int offset = offset_raiz;
         // leer considerando que bit mas significativo del primer valor entrega tipo de nodo
-        ArrayList<Integer> values = fm.read(offset, true);
+        ArrayList<Integer> values = fm.read(offset, true); in_counter++;
         int isLeaf = (values.get(0) >> 31) & 0x1;
         ArrayList<BTreeNode> visited_nodes = new ArrayList<>(); // nodos visitados
         ArrayList<Integer> visited_index = new ArrayList<>(); // indices de ramas visitadas
@@ -258,7 +255,7 @@ public class BTreeDict implements Dictionary {
             visited_index.add(i);
             offset = node.getPointers().get(i); //guardar referencia de sgte nodo para ser leido
             //se revisa siguiente bloque
-            values = fm.read(offset, true);
+            values = fm.read(offset, true); in_counter++;
             isLeaf = (values.get(0) >> 31) & 0x1;
             visited_nodes.add(node); // mantener registro de nodos visitados
             h++;
@@ -266,31 +263,15 @@ public class BTreeDict implements Dictionary {
         // se elimina llave a hoja
         BTreeLeaf leaf = new BTreeLeaf(this.B, offset, values);
         if (!leaf.delete(key)){
-            System.out.println("Nodos visitados");
-            for(BTreeNode vnode: visited_nodes)
-                System.out.println(Integer.toHexString(vnode.getOffset()));
-            System.out.println("Indices visitados");
-            for(Integer vnode: visited_index)
-                System.out.println(Integer.toHexString(vnode));
-            System.out.println("Offset visitados");
-            for(int k = 0; k < visited_index.size(); k++)
-                System.out.println(Integer.toHexString(visited_nodes.get(k).getPointers().get(visited_index.get(k))));
-            System.out.println("Offset disponibles");
-            for(int k = 0; k < visited_nodes.get(visited_nodes.size() - 1).getPointers().size(); k++)
-                System.out.println(Integer.toHexString(visited_nodes.get(visited_nodes.size() - 1).getPointers().get(k)));
-            System.out.println("Llaves disponibles");
-            for(int k = 0; k < visited_nodes.get(visited_nodes.size() - 1).getKeys().size(); k++)
-                System.out.println(Integer.toHexString(visited_nodes.get(1).getKeys().get(k).hashCode()));
-            System.out.println("Llaves buscadas");
-            for(DNA fkey: leaf.getValues())
-                System.out.println(Integer.toHexString(fkey.hashCode()));
-            if (debug) System.out.println("(!) Key " + Integer.toHexString(key.hashCode())
+            System.out.println("(!) Key " + Integer.toHexString(key.hashCode())
                     + " is not contained in this Btree");
             return;
-        } else
+        } else {
+            size-=4;
             if(debug) System.out.println("Delete " + Integer.toHexString(key.hashCode())
                 + " from leaf: " + leaf.getOffset()
                 + " with blocksize: " + leaf.getValues().size());
+        }
         // Si menos de la mitad del bloque queda ocupado en un nodo que no es raiz, se fusiona con el vecino
         if(leaf.getValues().size() < B/2 && offset != this.offset_raiz) {
             int n_k = h - 1; // indice ultimo nodo visitado
@@ -301,7 +282,7 @@ public class BTreeDict implements Dictionary {
             if (debug) System.out.println("Vecino v_i: " + v_i + " de vecino v_k " + v_k + " (" + n + ")");
             int v_offset = father_node.getPointers().get(v_i),
                     v_min = Math.min(v_k, v_i); // referencia al menor indicee
-            values = fm.read(v_offset, true); // leer valores de hoja vecina
+            values = fm.read(v_offset, true); in_counter++; // leer valores de hoja vecina
             BTreeLeaf v_leaf = new BTreeLeaf(this.B, v_offset, values); // guardar en un BTreeLeaf
             // unir hojas
             BTreeLeaf new_leaf = v_k == v_min? leaf.join(v_leaf): v_leaf.join(leaf);
@@ -322,11 +303,11 @@ public class BTreeDict implements Dictionary {
                 // primera hoja se guarda en mismo bloque usado por hoja original
                 // segunda hoja se pone en donde estaba la otra hoja
                 if(v_k < v_i) {
-                    fm.write(new_leaf1, offset);
-                    fm.write(new_leaf2, v_offset);
+                    fm.write(new_leaf1, offset); out_counter++;
+                    fm.write(new_leaf2, v_offset); out_counter++;
                 } else {
-                    fm.write(new_leaf1, v_offset);
-                    fm.write(new_leaf2, offset);
+                    fm.write(new_leaf1, v_offset); out_counter++;
+                    fm.write(new_leaf2, offset); out_counter++;
                 }
                 if (debug) System.out.println("Split leaf " + offset
                         + " into leaf " + offset + " with blocksize: " + new_leaf1.size()
@@ -335,10 +316,10 @@ public class BTreeDict implements Dictionary {
                         + " at key position " + Math.min(v_k, v_i)
                         + " in node " + father_node.getOffset());
                 father_node.replace_key(Math.min(v_k, v_i), new_leaf.getValues().get(m));
-                fm.write(father_node.getIntValues(), father_node.getOffset(), true);
+                fm.write(father_node.getIntValues(), father_node.getOffset(), true); out_counter++;
             } else { //si no hay rebalse, se escribe hoja
                 // primera hoja se guarda en mismo bloque usado por hoja izquierda
-                fm.write(new_leaf.getIntValues(), offset, false);
+                fm.write(new_leaf.getIntValues(), offset, false); out_counter++; used_blocks--;
                 // hay una llave y referencia por eliminar en nodo padre
                 DNA deleted_key;
                 if (v_i < v_k) { // se elimina llave previa
@@ -347,7 +328,7 @@ public class BTreeDict implements Dictionary {
                 } else { // se elimina llave siguiente
                     deleted_key = father_node.getKeys().get(v_k);
                     father_node.delete(deleted_key, false);
-                }
+                } size-=8;
                 if (debug) System.out.println("Delete key " + Integer.toHexString(deleted_key.hashCode())
                         + " from node: " + father_node.getOffset()
                         + " with blocksize: " + father_node.getBlocksize());
@@ -365,7 +346,7 @@ public class BTreeDict implements Dictionary {
                     v_offset = father_node.getPointers().get(v_i); // referencia de este nodo vecino
                     v_min = Math.min(v_k, v_i);
                     // leer info nodo vecino
-                    values = fm.read(v_offset, true); // leer valores de nodo vecino
+                    values = fm.read(v_offset, true); in_counter++; // leer valores de nodo vecino
                     BTreeNode v_node = new BTreeNode(this.B, v_offset, values); // guardar en un BTreeNode
                     int cp_index = v_k < v_i? current_node.getKeys().size() : 0,
                             vp_index = v_k < v_i? 0 : v_node.getKeys().size();
@@ -384,8 +365,8 @@ public class BTreeDict implements Dictionary {
                             v_node.delete(x1, false);
                         }
                         father_node.replace_key(v_min, x1);
-                        fm.write(current_node.getIntValues(), current_node.getOffset(), true);
-                        fm.write(v_node.getIntValues(), v_node.getOffset(), true);
+                        fm.write(current_node.getIntValues(), current_node.getOffset(), true); out_counter++;
+                        fm.write(v_node.getIntValues(), v_node.getOffset(), true); out_counter++;
                         if (debug) System.out.println("Moved key " + Integer.toHexString(x1.hashCode())
                                 + " from node: " + v_node.getOffset()
                                 + " with new blocksize: " + v_node.getBlocksize()
@@ -420,7 +401,7 @@ public class BTreeDict implements Dictionary {
                             new_node.add(second_node.getKeys().get(i).hashCode());
                             new_node.add(second_node.getPointers().get(i + 1));
                         }
-                        fm.write(new_node, current_node.getOffset(), true);
+                        fm.write(new_node, current_node.getOffset(), true); size-=4; used_blocks--;
                         if (debug) System.out.println("Joining nodes " + current_node.getOffset()
                                 + " and " + v_offset + " in node: " + current_node.getOffset()
                                 + " with new blocksize: " + new_node.size());
@@ -437,9 +418,9 @@ public class BTreeDict implements Dictionary {
                     if (debug) System.out.println("Raiz " + this.offset_raiz
                             + " without keys, node " + current_node.getPointers().get(0)
                             + " become the new raiz with blocksize: " + current_node.getBlocksize());
-                    this.offset_raiz = current_node.getPointers().get(0);
+                    this.offset_raiz = current_node.getPointers().get(0); used_blocks--;
                 }
-                fm.write(current_node.getIntValues(), current_node.getOffset(), true);
+                fm.write(current_node.getIntValues(), current_node.getOffset(), true); out_counter++;
             }
         }
         else { //si no hay escasez, se actualiza hoja
@@ -448,14 +429,20 @@ public class BTreeDict implements Dictionary {
                 this.offset_raiz = -1;
             // si no es la raiz, entonces no hay escasez
             // entonces solo se actualiza hoja
-            fm.write(leaf.getIntValues(), leaf.getOffset(), false);
+            fm.write(leaf.getIntValues(), leaf.getOffset(), false); out_counter++;
         }
 
     }
 
-    public void resetIOCounter(){}
+    public void resetIOCounter(){
+        in_counter = 0; out_counter = 0;
+    }
 
-    public int getIOs(){return 0;}
+    public int getIOs(){return in_counter + out_counter;}
 
-    public int getUsedSpace(){return 0;}
+    public int getUsedSpace(){
+        System.out.println("Espacio usado: " + (size + 4 * used_blocks) + ", bloques usados: " + used_blocks);
+        if(this.offset_raiz == -1)
+            return 0;
+        return size / used_blocks + 4;}
 }
