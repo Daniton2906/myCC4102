@@ -60,6 +60,7 @@ public class ExtHashDict implements Dictionary {
 
     private boolean debug;
     private int in_counter, out_counter;
+    private int in_use_block, memory;
 
     // una pagina es equivalente a un bloque.
     public ExtHashDict(String filename, int B, boolean debug) {
@@ -74,11 +75,12 @@ public class ExtHashDict implements Dictionary {
 
         this.in_counter = 0;
         this.out_counter = 0;
+        this.in_use_block = 0;
+        this.memory = 0;
 
         ArrayList<Integer> id = new ArrayList<>();
         id.add(0);
         this.fm.write(id, 0); this.out_counter++;
-
     }
 
     // retorna nodo al que esta asociado a la pagina buscada segun el hash (completo, sin testear).
@@ -198,10 +200,6 @@ public class ExtHashDict implements Dictionary {
     }
 
     // inserta elemento en el hash (listo).
-    /*
-    * Test: inserciones                             (testeado)
-    *       insercion + duplicacion
-    * */
     public void put(DNA key, long value) {
         if(this.debug)
             System.out.println("ExtHash::put >> insertando cadena: " + key.toString() + ", hashCode: " + key.hashCode());
@@ -366,8 +364,9 @@ public class ExtHashDict implements Dictionary {
                 last_chain = last_content.get(last_content.get(0));
             }
 
-            if(last_content.get(0) != B - 2)
+            if(last_content.get(0) != B - 2) {
                 break;
+            }
 
             if(this.debug)
                 System.out.println("ExtHash::delete >> acceciendo a siguiente pagina");
@@ -465,9 +464,11 @@ public class ExtHashDict implements Dictionary {
         return res;
     }
 
-    public void resetIOCounter(){}
+    public void resetIOCounter(){
+        this.in_counter = 0; this.out_counter = 0;
+    }
 
-    public int getIOs(){return 0;}
+    public int getIOs(){return this.in_counter + this.out_counter;}
 
     public int getUsedSpace(){return 0;}
 }

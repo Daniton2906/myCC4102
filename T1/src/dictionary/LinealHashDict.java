@@ -14,6 +14,7 @@ public class LinealHashDict implements Dictionary {
     private final FileManager fm;
     private ArrayList<Integer> index_reference;
     private boolean debug;
+    private int in_use_block, memory;
 
     // Idea: utilizar dos bloques para guardar referencias a bloques, uno mantiene referencia a bloques de memoria
     //       que estan actualmente siendo utilizados, y el segundo mantiene referencia a bloques que han sido
@@ -32,6 +33,8 @@ public class LinealHashDict implements Dictionary {
         this.debug = debug;
         this.in_counter = 0;
         this.out_counter = 0;
+        this.in_use_block = 0;
+        this.memory = 0;
         this.index_reference = new ArrayList<>();
         index_reference.add(0);
 
