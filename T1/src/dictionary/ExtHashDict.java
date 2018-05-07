@@ -57,22 +57,32 @@ public class ExtHashDict implements Dictionary {
     private int B, last;
     private final FileManager fm;
     private Node tree_reference;
+    private boolean debug;
 
     // una pagina es equivalente a un bloque.
-    public ExtHashDict(String filename, int B) {
+    public ExtHashDict(String filename, int B, boolean debug) {
         // caso en que se usa un hashing lineal ya creado(?).
 
         // caso en que se crea un hashing lineal.
+        this.debug = debug;
         this.fm = new FileManager(B, new File(filename));
         this.B = B;
-        this.tree_reference = new Node(1);  // bloque cero mantiene los bloques en desuso.
-        this.last = 2;
+        this.tree_reference = new Node(0);  // bloque cero mantiene los bloques en desuso.
+        this.last = 1;
 
         ArrayList<Integer> id = new ArrayList<>();
         id.add(0);
-        this.fm.write(id, 1);
-
         this.fm.write(id, 0);
+
+        //id = this.fm.read(1);
+
+        /*
+        System.out.println(id.size());
+        for(int i=0; i<id.size(); i++)
+            System.out.println("  " + id.get(i));
+        */
+
+        //this.fm.write(id, 0);
 
     }
 
@@ -156,9 +166,19 @@ public class ExtHashDict implements Dictionary {
         }
     }
 
-    // inserta elemento en el hash (completo, falta testear).
+    // inserta elemento en el hash (listo).
+    /*
+    * Test: inserciones                             (testeado)
+    *       insercion + duplicacion
+    * */
+
     public void put(DNA key, long value) {
+        if(this.debug)
+            System.out.println("ExtHash::put >> insertando cadena: " + key.toString() + ", hashCode: " + key.hashCode());
+
         Node actual_node = this.getReference(key);
+        if(this.debug)
+            System.out.println("ExtHash::put >> altura del nodo: " + actual_node.getAltura());
 
         int reference_page = actual_node.getReference();
         ArrayList<Integer> content = this.fm.read(reference_page);
@@ -168,8 +188,21 @@ public class ExtHashDict implements Dictionary {
 
         int total_elements = 0, altura = actual_node.getAltura();
         while(true) {
+
+            if(this.debug)
+                System.out.println("ExtHash::put >> referencia a pagina: " + reference_page);
+
+            if(this.debug) {
+                System.out.println("ExtHash::put >> contenido de la pagina:");
+                for(int i=0; i<content.size(); i++)
+                    System.out.println("  " + content.get(i));
+            }
+
             total_elements += last_content.get(0);
             if(last_content.get(0) != B-2) {
+                if(this.debug)
+                    System.out.println("ExtHash::put >> insertando en: " + last_page);
+
                 ArrayList<Integer> new_content = new ArrayList<>();
 
                 new_content.add(last_content.get(0) + 1);
@@ -177,9 +210,9 @@ public class ExtHashDict implements Dictionary {
                     new_content.add(last_content.get(i));
 
                 new_content.add(key.hashCode());
+
                 if(new_content.get(0) == B-2) {
                     new_content.add(this.last);
-                    this.fm.write(new_content, reference_page);
 
                     ArrayList<Integer> last = new ArrayList<>();
                     last.add(0);
@@ -188,17 +221,31 @@ public class ExtHashDict implements Dictionary {
                     this.last++;
 
                 }
+
+                if(this.debug) {
+                    System.out.println("ExtHash::put >> contenido en pagina despues de insercion:");
+                    for(int i=0; i<new_content.size(); i++)
+                        System.out.println("  " + new_content.get(i));
+                }
+
+                this.fm.write(new_content, reference_page);
+
                 total_elements++;  // por el elmento que se inserto.
                 break;
 
             }
+            if(this.debug)
+                System.out.println("ExtHash::put >> acceciendo a siguiente pagina");
 
             last_page = last_content.get(B-1);
             last_content = this.fm.read(last_page);
         }
 
         // se lleno la pagina y aun no se llega al final del hashing.
-        if(total_elements >= B - 2 && altura < 30){
+        if(total_elements >= B - 2 && altura < 30 && false){
+            if(this.debug)
+                System.out.println("ExtHash::put >> limite de pagina, iniciando duplicacion");
+
             this.duplicate(actual_node);
         }
     }
@@ -237,7 +284,12 @@ public class ExtHashDict implements Dictionary {
 
     // elimina el elemento key del diccionario, si es que esta contenido (completo, falta testear).
     public void delete(DNA key){
+        if(this.debug)
+            System.out.println("ExtHash::delete >> eliminando cadena: " + key.toString() + ", hashCode: " + key.hashCode());
+
         Node actual_node = this.getReference(key);
+        if(this.debug)
+            System.out.println("ExtHash::delete >> altura del nodo: " + actual_node.getAltura());
 
         int reference_page = actual_node.getReference();
         ArrayList<Integer> content = this.fm.read(reference_page);
@@ -245,17 +297,27 @@ public class ExtHashDict implements Dictionary {
         int last_page = reference_page, last_chain = 0;
         ArrayList<Integer> last_content = content, search_content;
 
-        int total_elements = 0, altura = actual_node.getAltura();
-
         // last_block: referencia al ultimo bloque.
         // search_block: referencia al bloque con el elemento buscado.
         int last_block = reference_page, search_block = -1, search_pos = -1;
+        int total_elements = 0, altura = actual_node.getAltura();
 
         while(true) {
+            if(this.debug)
+                System.out.println("ExtHash::delete >> referencia a pagina: " + last_page);
+
+            if(this.debug) {
+                System.out.println("ExtHash::delete >> contenido de la pagina:");
+                for(int i=0; i<last_content.size(); i++)
+                    System.out.println("  " + last_content.get(i));
+            }
+
             total_elements += last_content.get(0);
             if(search_block == -1) {
                 for (int i = 1; i <= last_content.get(0); i++) {
                     if (last_content.get(i) == key.hashCode()) {
+                        if(this.debug)
+                            System.out.println("ExtHash::delete >> cadena " + key.hashCode() + " encontrada");
                         search_pos = i;
                         search_block = last_page;
                         break;
@@ -270,6 +332,9 @@ public class ExtHashDict implements Dictionary {
 
             if(last_content.get(0) != B - 2)
                 break;
+
+            if(this.debug)
+                System.out.println("ExtHash::delete >> acceciendo a siguiente pagina");
 
             last_page = last_content.get(B-1);
             last_content = this.fm.read(last_page);

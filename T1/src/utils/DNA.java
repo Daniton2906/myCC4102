@@ -18,6 +18,7 @@ public class DNA {
         int codeNum = 0;
         for (int i = 0; i < CHAIN_LENGTH; i++) {
             char b = myChain.get(i);
+            codeNum <<= 2;
             switch (b){
                 case 'C':
                     codeNum |= 0x1;
