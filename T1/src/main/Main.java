@@ -19,7 +19,7 @@ public class Main {
     static final private int B = 512;
     static final private String btree_filename = "/T1/tmp/btree_data.ser";
 
-    public static void main (String [ ] args) {
+    public static void main (String [ ] args) throws IOException {
         System.out.println("Empezamos la ejecución del programa");
 
         DataGenerator rand_data_gen = new DataGenerator();
@@ -49,7 +49,7 @@ public class Main {
 
         int n = (int) CHAINS/32;
         //Tester.test1(btree, dna_array, n);
-        Tester.test2(btree, dna_array, rand_data_gen);
+        Tester.test2(btree, dna_array, rand_data_gen, "btree");
         //Tester.test2(exth, dna_array, rand_data_gen);
         //Tester.test2(linh0, dna_array, rand_data_gen);
         //Tester.test2(linh1, dna_array, rand_data_gen);

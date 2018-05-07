@@ -2,14 +2,18 @@ package utils;
 
 import dictionary.Dictionary;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class Tester {
 
-    static final private int FROM_I_EXP = 15;
-    static final private int TO_I_EXP = 20;
+    static final private int FROM_I_EXP = 14;
+    static final private int TO_I_EXP = 15;
 
     static public void test0(FileManager fm, ArrayList<DNA> dna_array, int from, int to, int b_offset) {
 
@@ -26,7 +30,7 @@ public class Tester {
         System.out.println("############################");
     }
 
-    static public void test1(Dictionary dict, ArrayList<DNA> chain_array, int n){
+    static public void test1(Dictionary dict, ArrayList<DNA> chain_array, int n) {
         List<DNA> L = chain_array.subList(0, n); //new ArrayList<>(); //
         System.out.println("Insertando " + n + " claves");
         for (DNA dna: L)
@@ -61,7 +65,7 @@ public class Tester {
         System.out.println("##############################");
     }
 
-    static public void test2(Dictionary dict, ArrayList<DNA> chain_array, DataGenerator dg){
+    static public void test2(Dictionary dict, ArrayList<DNA> chain_array, DataGenerator dg, String name)  throws IOException {
         ArrayList<Integer> checkpoints = new ArrayList<>();
         for(int i = FROM_I_EXP; i <= TO_I_EXP; i++)
             checkpoints.add((int) Math.pow(2, i));
@@ -97,7 +101,7 @@ public class Tester {
         for (int k = size - 1; k >= 0; k--) {
             dict.delete(chain_array.get(k));
             if(checkpoints.contains(k + 1)) {
-                System.out.println("Checkpoint borrar hasta " + (k + 1) + "claves");
+                System.out.println("Checkpoint borrar hasta " + (k + 1) + " claves");
                 results.get(w).add(dict.getUsedSpace());
                 results.get(w).add(dict.getIOs());
                 totalIOs += dict.getIOs();
@@ -109,14 +113,36 @@ public class Tester {
         results.get(results.size() - 1).add(totalIOs);
         dict.resetIOCounter();
         checkpoints.add(size);
-        System.out.println("############################## REPORT ###########################################################");
-        System.out.println("i \t 2^i \t space_put \t ios_put \t ios_search_in \t ios_search_out \t space_delete \t ios_delete");
-        for(int i = 0; i <= results.size(); i++){
-            ArrayList<Integer> tmp = results.get(i);
-            System.out.print((FROM_I_EXP + i) + "\t" + checkpoints.get(i));
-            for(int num: tmp)
-                System.out.print("\t" + num);
-            System.out.println("");
-        }
+
+        String btree_filename = "/T1/results/" + name + System.currentTimeMillis() + ".tsv";
+        String fileName = System.getProperty("user.dir") + btree_filename;
+
+        //try {
+
+            File fd = new File(fileName);
+            fd.getParentFile().mkdir();
+            fd.createNewFile();
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fd));
+
+            System.out.println("############################## REPORT ###########################################################");
+            String header = "i \t 2^i \t space_put \t ios_put \t ios_search_in \t ios_search_out \t space_delete \t ios_delete" + System.lineSeparator();
+            System.out.print(header);
+            writer.write(header);
+            for(int i = 0; i < results.size(); i++){
+                ArrayList<Integer> tmp = results.get(i);
+                StringBuilder sb = new StringBuilder();
+                sb.append(FROM_I_EXP + i); sb.append("\t"); sb.append(checkpoints.get(i));
+                for(int num: tmp) {
+                    sb.append("\t"); sb.append(num);
+                }
+                sb.append(System.lineSeparator());
+
+                System.out.print(sb.toString());
+                writer.write(sb.toString());
+            }
+            writer.close();
+        /*} catch( IOException e) {
+            System.out.println("error");
+        }*/
     }
 }
