@@ -43,7 +43,7 @@ public class DataGenerator {
         while(n++ < size)
             sub_chains.add(chains.get(Math.abs(rand.nextInt()) % chains.size()));
 
-        System.out.println("Size: " + sub_chains.size());
+        // System.out.println("Size: " + sub_chains.size());
         return sub_chains;
     }
 
@@ -58,12 +58,13 @@ public class DataGenerator {
                 DNA next = randomChain(rand);
                 if (!chains.contains(next))
                     sub_chains.add(next);
+                else n--;
             } catch (InvalidAttributeValueException e) {
                 System.err.println("Error: chain must be 15 bases long...");
                 return null;
             }
         }
-        System.out.println("Size: " + sub_chains.size());
+        // System.out.println("Size: " + sub_chains.size());
         return sub_chains;
     }
 

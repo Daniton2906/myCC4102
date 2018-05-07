@@ -68,19 +68,23 @@ public class Tester {
 
         int size = (int) Math.pow(2, TO_I_EXP);
         ArrayList<ArrayList<Integer>> results = new ArrayList<>();
+        System.out.println("Comienza test, registro datos desde " + checkpoints.get(0) + " claves.");
         for (int k = 0; k < size; k++) {
             dict.put(chain_array.get(k), 0);
             if(checkpoints.contains(k + 1)) {
+                System.out.println("Checkpoint insertar " + (k + 1) + " claves");
                 ArrayList<Integer> tmp = new ArrayList<>();
                 tmp.add(dict.getUsedSpace());
                 tmp.add(dict.getIOs());
                 ArrayList<DNA> in_list = dg.getRandomChunk(chain_array, 1000),
                         out_list = dg.getOtherChunk(chain_array, 1000);
                 dict.resetIOCounter();
+                System.out.println("Buscando " + 1000 + " claves insertadas en el dict");
                 for(DNA in_dna: in_list)
                     dict.containsKey(in_dna);
                 tmp.add(dict.getIOs());
                 dict.resetIOCounter();
+                System.out.println("Buscando " + 1000 + " claves fuera del dict");
                 for(DNA out_dna: in_list)
                     dict.containsKey(out_dna);
                 tmp.add(dict.getIOs());
@@ -90,9 +94,10 @@ public class Tester {
         checkpoints.remove(size);
         int w = results.size() - 2;
         int totalIOs = 0;
-        for (int i = size - 1; i >= 0; i--) {
-            dict.delete(chain_array.get(i));
-            if(checkpoints.contains(i + 1)) {
+        for (int k = size - 1; k >= 0; k--) {
+            dict.delete(chain_array.get(k));
+            if(checkpoints.contains(k + 1)) {
+                System.out.println("Checkpoint borrar hasta " + (k + 1) + "claves");
                 results.get(w).add(dict.getUsedSpace());
                 results.get(w).add(dict.getIOs());
                 totalIOs += dict.getIOs();

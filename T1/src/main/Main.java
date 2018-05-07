@@ -43,7 +43,8 @@ public class Main {
         fm.append(L);*/
 
         int n = (int) CHAINS/32;
-        Tester.test1(btree, dna_array, n);
+        //Tester.test1(btree, dna_array, n);
+        Tester.test2(btree, dna_array, rand_data_gen);
 
     }
 }
