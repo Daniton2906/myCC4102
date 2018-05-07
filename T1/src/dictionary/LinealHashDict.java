@@ -540,9 +540,11 @@ public class LinealHashDict implements Dictionary {
         return res;
     }
 
-    public void resetIOCounter(){}
+    public void resetIOCounter(){
+        this.in_counter = 0; this.out_counter = 0;
+    }
 
-    public int getIOs(){return 0;}
+    public int getIOs(){return this.in_counter + this.out_counter;}
 
     public int getUsedSpace(){return 0;}
 }
