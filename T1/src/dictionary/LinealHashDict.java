@@ -14,7 +14,7 @@ public class LinealHashDict implements Dictionary {
     private final FileManager fm;
     private ArrayList<Integer> index_reference;
     private boolean debug;
-    private int in_use_block, memory;
+    private int total_in = 0, total_active_block = 1;
 
     // Idea: utilizar dos bloques para guardar referencias a bloques, uno mantiene referencia a bloques de memoria
     //       que estan actualmente siendo utilizados, y el segundo mantiene referencia a bloques que han sido
@@ -33,8 +33,6 @@ public class LinealHashDict implements Dictionary {
         this.debug = debug;
         this.in_counter = 0;
         this.out_counter = 0;
-        this.in_use_block = 0;
-        this.memory = 0;
         this.index_reference = new ArrayList<>();
         index_reference.add(0);
 
@@ -71,6 +69,7 @@ public class LinealHashDict implements Dictionary {
         int aux_ref = this.index_reference.get(p1);
         ArrayList<Integer> aux_cont = this.fm.read(aux_ref); this.in_counter++;
         while(true) {
+            this.total_active_block--;
             if(this.debug)
                 System.out.println("LinealHash::expand >> procesando pagina: " + aux_ref);
 
@@ -116,6 +115,7 @@ public class LinealHashDict implements Dictionary {
         for(int i=0; i<content1.size(); i++) {
             aux_cont.add(content1.get(i));
             if(aux_cont.size() == B - 2 || i == content1.size() - 1) {
+                this.total_active_block++;
                 int cant = aux_cont.size();
                 aux_cont.add(0, cant);
 
@@ -169,6 +169,7 @@ public class LinealHashDict implements Dictionary {
         for(int i=0; i<content2.size(); i++) {
             aux_cont.add(content2.get(i));
             if(aux_cont.size() == B - 2 || i == content2.size() - 1) {
+                this.total_active_block++;
                 int cant = aux_cont.size();
                 aux_cont.add(0, cant);
 
@@ -218,6 +219,7 @@ public class LinealHashDict implements Dictionary {
 
     // inserta un elemento en el diccionario (completo, con test).
     public void put(DNA key, long value) {
+        this.total_in++;
         if(this.debug)
             System.out.println("LinealHash::put >> valor de hash: " + key.hashCode());
 
@@ -257,6 +259,7 @@ public class LinealHashDict implements Dictionary {
 
         // caso en que el bloque se llena.
         if(new_content.get(0) == B - 2) {
+            total_active_block++;
             if(this.debug)
                 System.out.println("LinealHash::put >> pagina llenada, agreagando referencia " + this.last);
 
@@ -309,6 +312,7 @@ public class LinealHashDict implements Dictionary {
         ArrayList<Integer> last_cont = this.fm.read(reference_p), content = new ArrayList<>(); this.in_counter++;
 
         while(true) {
+            this.total_active_block--;
             for(int i=1; i<=last_cont.get(0); i++) {
                 content.add(last_cont.get(i));
             }
@@ -350,6 +354,7 @@ public class LinealHashDict implements Dictionary {
                 for(int i=0; i<content.size(); i++) {
                     new_content.add(content.get(i));
                     if(new_content.size() == B - 2 || i == content.size() - 1) {
+                        this.total_active_block++;
                         int cant = new_content.size();
                         new_content.add(0, cant);
 
@@ -413,6 +418,7 @@ public class LinealHashDict implements Dictionary {
             if(search_block == -1) {
                 for (int i = 1; i <= last_content.get(0); i++) {
                     if (last_content.get(i) == key.hashCode()) {
+                        this.total_in--;
                         if(this.debug)
                             System.out.println("LinealHash::delete >> elemento encontrado, pos: " + i);
                         search_pos = i;
@@ -554,5 +560,8 @@ public class LinealHashDict implements Dictionary {
 
     public int getIOs(){return this.in_counter + this.out_counter;}
 
-    public int getUsedSpace(){return 0;}
+    public int getUsedSpace(){
+        int total = (this.total_in + this.total_active_block) / this.total_active_block;
+        return 0;
+    }
 }

@@ -61,6 +61,7 @@ public class ExtHashDict implements Dictionary {
     private boolean debug;
     private int in_counter, out_counter;
     private int in_use_block, memory;
+    private int total_in = 0, total_active_block = 1;
 
     // una pagina es equivalente a un bloque.
     public ExtHashDict(String filename, int B, boolean debug) {
@@ -159,6 +160,8 @@ public class ExtHashDict implements Dictionary {
         Node r = new Node(this.last); this.last++;
         r.setAltura(shift + 1);
 
+        total_active_block++;
+
         if(this.debug) {
             System.out.println("ExtHash::duplicate >> contentido de paginas duplicadas(left), ref: " + reference_page);
             for(int i=0; i<left.size(); i++) {
@@ -201,6 +204,7 @@ public class ExtHashDict implements Dictionary {
 
     // inserta elemento en el hash (listo).
     public void put(DNA key, long value) {
+        total_in++;
         if(this.debug)
             System.out.println("ExtHash::put >> insertando cadena: " + key.toString() + ", hashCode: " + key.hashCode());
 
@@ -240,6 +244,7 @@ public class ExtHashDict implements Dictionary {
                 new_content.add(key.hashCode());
 
                 if(new_content.get(0) == B-2) {
+                    total_active_block++;
                     new_content.add(this.last);
 
                     ArrayList<Integer> last = new ArrayList<>();
@@ -295,6 +300,8 @@ public class ExtHashDict implements Dictionary {
 
         // en caso de que sea posible juntar las paginas.
         if(right_content.get(0) + left_content.get(0) < B-2) {
+            total_active_block--;
+
             if(this.debug)
                 System.out.println("ExtHash::compress >> ambas paginas se pueden fusionar");
 
@@ -354,6 +361,7 @@ public class ExtHashDict implements Dictionary {
                         search_pos = i;
                         search_block = last_page;
                         total_elements--;
+                        total_in--;
                         break;
                     }
                 }
@@ -392,6 +400,8 @@ public class ExtHashDict implements Dictionary {
                         new_content.add(search_content.get(i));
 
                 }
+                if(search_content.get(0) == B-2)
+                    total_active_block--;
 
             } else {
                 // elemento buscado no esta en la ultima pagina de la lista enlazada.
@@ -411,6 +421,9 @@ public class ExtHashDict implements Dictionary {
                     new_last_content.add(last_content.get(i));
 
                 }
+                if(last_content.get(0) == B-2)
+                    total_active_block--;
+
                 this.fm.write(new_last_content, last_block); this.out_counter++;
 
             }
@@ -470,5 +483,8 @@ public class ExtHashDict implements Dictionary {
 
     public int getIOs(){return this.in_counter + this.out_counter;}
 
-    public int getUsedSpace(){return 0;}
+    public int getUsedSpace(){
+        int total = (this.total_in + this.total_active_block) / this.total_active_block;
+        return total;
+    }
 }
