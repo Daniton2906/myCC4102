@@ -106,6 +106,7 @@ public class Tester {
                 results.get(w).add(dict.getIOs());
                 totalIOs += dict.getIOs();
                 dict.resetIOCounter();
+                w--;
             }
         }
         totalIOs += dict.getIOs();
