@@ -78,20 +78,28 @@ public class Tester {
             if(checkpoints.contains(k + 1)) {
                 System.out.println("Checkpoint insertar " + (k + 1) + " claves");
                 ArrayList<Integer> tmp = new ArrayList<>();
-                tmp.add(dict.getUsedSpace());
-                tmp.add(dict.getIOs());
+                int us = dict.getUsedSpace(),
+                    ios = dict.getIOs();
+                System.out.println("Espacio por bloque put en checkpoint " + (k + 1) + ": " + us);
+                System.out.println("IOs put en checkpoint " + (k + 1) + ": " + ios);
+                tmp.add(us);
+                tmp.add(ios);
                 ArrayList<DNA> in_list = dg.getRandomChunk(chain_array, 1000),
                         out_list = dg.getOtherChunk(chain_array, 1000);
                 dict.resetIOCounter();
                 System.out.println("Buscando " + 1000 + " claves insertadas en el dict");
                 for(DNA in_dna: in_list)
                     dict.containsKey(in_dna);
-                tmp.add(dict.getIOs());
+                int ios_s = dict.getIOs();
+                System.out.println("IOs busquedas exitosas en checkpoint " + (k + 1) + ": " + ios_s);
+                tmp.add(ios_s);
                 dict.resetIOCounter();
                 System.out.println("Buscando " + 1000 + " claves fuera del dict");
                 for(DNA out_dna: in_list)
                     dict.containsKey(out_dna);
-                tmp.add(dict.getIOs());
+                int ios_s2 = dict.getIOs();
+                System.out.println("IOs busquedas infructuosas en checkpoint " + (k + 1) + ": " + ios_s2);
+                tmp.add(ios_s2);
                 results.add(tmp);
             }
         }
@@ -101,15 +109,21 @@ public class Tester {
         for (int k = size - 1; k >= 0; k--) {
             dict.delete(chain_array.get(k));
             if(checkpoints.contains(k + 1)) {
+                int us_d = dict.getUsedSpace(),
+                        ios_d = dict.getIOs();
                 System.out.println("Checkpoint borrar hasta " + (k + 1) + " claves");
-                results.get(w).add(dict.getUsedSpace());
-                results.get(w).add(dict.getIOs());
+                System.out.println("Espacio por bloque put en checkpoint " + (k + 1) + ": " + us_d);
+                System.out.println("IOs put en checkpoint " + (k + 1) + ": " + ios_d);
+                results.get(w).add(us_d);
+                results.get(w).add(ios_d);
                 totalIOs += dict.getIOs();
                 dict.resetIOCounter();
                 w--;
             }
         }
         totalIOs += dict.getIOs();
+        System.out.println("IOs totales para vaciar dict: " + totalIOs);
+        System.out.println("IOs totales para vaciar dict desde" + checkpoints.get(0) + ": " + dict.getIOs());
         results.get(results.size() - 1).add(dict.getIOs());
         results.get(results.size() - 1).add(totalIOs);
         dict.resetIOCounter();
