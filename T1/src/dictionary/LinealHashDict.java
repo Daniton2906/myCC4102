@@ -561,7 +561,6 @@ public class LinealHashDict implements Dictionary {
     public int getIOs(){return this.in_counter + this.out_counter;}
 
     public int getUsedSpace(){
-        int total = (this.total_in + this.total_active_block) / this.total_active_block;
-        return 0;
+        return 4 * (this.total_in + this.total_active_block) / this.total_active_block;
     }
 }

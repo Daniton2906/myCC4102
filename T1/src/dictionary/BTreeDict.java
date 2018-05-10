@@ -445,5 +445,5 @@ public class BTreeDict implements Dictionary {
         if(debug) System.out.println("Espacio usado: " + (size) + ", bloques usados: " + used_blocks);
         if(this.offset_raiz == -1)
             return 0;
-        return size / used_blocks + 4;}
+        return size / used_blocks;}
 }

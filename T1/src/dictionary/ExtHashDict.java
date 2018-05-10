@@ -484,7 +484,6 @@ public class ExtHashDict implements Dictionary {
     public int getIOs(){return this.in_counter + this.out_counter;}
 
     public int getUsedSpace(){
-        int total = (this.total_in + this.total_active_block) / this.total_active_block;
-        return total;
+        return 4*(this.total_in + this.total_active_block) / this.total_active_block;
     }
 }
