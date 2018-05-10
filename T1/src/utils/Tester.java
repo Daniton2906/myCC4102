@@ -132,32 +132,27 @@ public class Tester {
         String btree_filename = "/T1/results/" + name + System.currentTimeMillis() + ".tsv";
         String fileName = System.getProperty("user.dir") + btree_filename;
 
-        //try {
+        File fd = new File(fileName);
+        fd.getParentFile().mkdir();
+        fd.createNewFile();
+        BufferedWriter writer = new BufferedWriter(new FileWriter(fd));
 
-            File fd = new File(fileName);
-            fd.getParentFile().mkdir();
-            fd.createNewFile();
-            BufferedWriter writer = new BufferedWriter(new FileWriter(fd));
-
-            System.out.println("############################## REPORT ###########################################################");
-            String header = "i \t 2^i \t space_put \t ios_put \t ios_search_in \t ios_search_out \t space_delete \t ios_delete" + System.lineSeparator();
-            System.out.print(header);
-            writer.write(header);
-            for(int i = 0; i < results.size(); i++){
-                ArrayList<Integer> tmp = results.get(i);
-                StringBuilder sb = new StringBuilder();
-                sb.append(FROM_I_EXP + i); sb.append("\t"); sb.append(checkpoints.get(i));
-                for(int num: tmp) {
-                    sb.append("\t"); sb.append(num);
-                }
-                sb.append(System.lineSeparator());
-
-                System.out.print(sb.toString());
-                writer.write(sb.toString());
+        System.out.println("############################## REPORT ###########################################################");
+        String header = "i \t 2^i \t space_put \t ios_put \t ios_search_in \t ios_search_out \t space_delete \t ios_delete" + System.lineSeparator();
+        System.out.print(header);
+        writer.write(header);
+        for(int i = 0; i < results.size(); i++){
+            ArrayList<Integer> tmp = results.get(i);
+            StringBuilder sb = new StringBuilder();
+            sb.append(FROM_I_EXP + i); sb.append("\t"); sb.append(checkpoints.get(i));
+            for(int num: tmp) {
+                sb.append("\t"); sb.append(num);
             }
-            writer.close();
-        /*} catch( IOException e) {
-            System.out.println("error");
-        }*/
+            sb.append(System.lineSeparator());
+
+            System.out.print(sb.toString());
+            writer.write(sb.toString());
+        }
+        writer.close();
     }
 }

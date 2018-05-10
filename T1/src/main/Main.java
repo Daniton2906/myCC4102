@@ -37,11 +37,11 @@ public class Main {
         String pathname_linh1 = System.getProperty("user.dir") + linh1_filename;
 
         int n_test= 1;
-        for(int i = 0; i< 0; i++) {
+        for(int i = 0; i< 1; i++) {
             Dictionary btree = new BTreeDict(pathname_btree, B, false);
             Tester.test2(btree, dna_array, rand_data_gen, "btree" + i + "-");
         }
-        for(int i = 0; i< 0; i++) {
+        for(int i = 0; i< 1; i++) {
             Dictionary exth = new ExtHashDict(pathname_exth, B, false);
             Tester.test2(exth, dna_array, rand_data_gen, "exth" + i + "-");
         }
