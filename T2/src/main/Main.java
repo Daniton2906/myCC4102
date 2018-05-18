@@ -1,5 +1,6 @@
 package main;
 
+import priority_queue.ColaBinomial;
 import priority_queue.HeapClasico;
 import priority_queue.PriorityQueue;
 import utils.DataManager;
@@ -15,7 +16,9 @@ public class Main {
         System.out.println("Hello World");
 
         DataManager dm = new DataManager(N, 0);
-        PriorityQueue heapClasico = new HeapClasico();
-        Tester.test0(heapClasico, dm, false);
+        PriorityQueue heapClasico = new HeapClasico(),
+                colaBinomial = new ColaBinomial();
+        //Tester.test0(heapClasico, dm, false);
+        Tester.test0(colaBinomial, dm, true);
     }
 }

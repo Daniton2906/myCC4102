@@ -1,11 +1,12 @@
 package priority_queue.test;
 
+import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Test;
 import org.junit.runners.MethodSorters;
-import priority_queue.HeapClasico;
+import priority_queue.ColaBinomial;
 import priority_queue.PriorityQueue;
 import utils.DataManager;
-import utils.Node;
 
 import java.util.Arrays;
 import java.util.Vector;
@@ -13,18 +14,17 @@ import java.util.Vector;
 import static org.junit.Assert.*;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class HeapClasicoTest {
+public class ColaBinomialTest {
 
-    private HeapClasico cp1, cp2, cp3, cp4, cp5;
+    private ColaBinomial cp1, cp2, cp3, cp4, cp5;
     private Vector<Object> vec1, vec2, vec3, vec4, vec5;
-
-    @org.junit.Before
+    @Before
     public void setUp() throws Exception {
-        cp1 = new HeapClasico();
-        cp2 = new HeapClasico();
-        cp3 = new HeapClasico();
-        cp4 = new HeapClasico();
-        cp5 = new HeapClasico();
+        cp1 = new ColaBinomial();
+        cp2 = new ColaBinomial();
+        cp3 = new ColaBinomial();
+        cp4 = new ColaBinomial();
+        cp5 = new ColaBinomial();
         Object[] a1d = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0},
                 a2d = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
                 a3d = {0, 7, 1, 2, 5, 3, 6, 9, 8, 4},
@@ -37,7 +37,7 @@ public class HeapClasicoTest {
         vec5 = new Vector<>(Arrays.asList(a5d));
     }
 
-    @org.junit.Test
+    @Test
     public void insertar() {
         for (int i = 0; i < 10; i++) {
             cp1.insertar((int) vec1.get(i), (int) vec1.get(i));
@@ -49,7 +49,7 @@ public class HeapClasicoTest {
         assertFalse(cp3.isEmpty());
     }
 
-    @org.junit.Test
+    @Test
     public void extraer_siguiente() {
         insertar();
         for (int i = 0; i < 10; i++) {
@@ -68,7 +68,7 @@ public class HeapClasicoTest {
             cp4.insertar((int) vec4.get(i), (int) vec4.get(i));
             cp5.insertar((int) vec5.get(i), (int) vec5.get(i));
         }
-        HeapClasico cp6 = new HeapClasico(cp4, cp5);
+        PriorityQueue cp6 = new ColaBinomial(cp4, cp5);
         for (int i = 0; i < 10; i++) {
             assertEquals(cp6.extraer_siguiente().getValue(), vec1.get(i));
         }
@@ -78,7 +78,7 @@ public class HeapClasicoTest {
     public void z_massive_test() {
         int n_test = 1000;
         DataManager dm = new DataManager(10000, 0);
-        PriorityQueue cp = new HeapClasico();
+        PriorityQueue cp = new ColaBinomial();
         for (int i = 0; i < n_test; i++) {
             Vector<Integer> vec = dm.getSuffleData();
             for(int num: vec){
@@ -89,4 +89,5 @@ public class HeapClasicoTest {
             }
         }
     }
+
 }
