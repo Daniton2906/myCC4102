@@ -19,6 +19,11 @@ public class Node implements Comparable<Node>{
     }
 
     @Override
+    public String toString() {
+        return "[ v: " + this.getValue() + ", p: " + this.getPriority() + " ]";
+    }
+
+    @Override
     public int compareTo(Node tuple) {
         return Integer.compare(this.getPriority(), tuple.getPriority());
     }
