@@ -2,22 +2,20 @@ package main;
 
 import priority_queue.HeapClasico;
 import priority_queue.PriorityQueue;
-import utils.Node;
+import utils.DataManager;
 import utils.Tester;
 
 import java.io.IOException;
 
 public class Main {
 
+    private static final int N = 10;
+
     public static void main (String [ ] args) throws IOException {
         System.out.println("Hello World");
-        Node n1 = new Node(100, 0),
-                n2 = new Node(50, 1),
-                n3 = new Node(75, 2);
-        System.out.println(n1.compareTo(n2));
-        System.out.println(n2.compareTo(n3));
-        System.out.println(n3.compareTo(n1));
+
+        DataManager dm = new DataManager(N, 0);
         PriorityQueue heapClasico = new HeapClasico();
-        Tester.test0(heapClasico, 10);
+        Tester.test0(heapClasico, dm, false);
     }
 }

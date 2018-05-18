@@ -10,7 +10,7 @@ public class DataManager {
 
     public DataManager(int n, long seed) {
         this.rand = new Random(seed);
-        for(int i = 0; i < n; i++) {
+        for(int i = n - 1; i >= 0; i--) {
             data.add(i);
         }
     }
@@ -30,6 +30,10 @@ public class DataManager {
         }
         new_vector.add((int) int_array[0]);
         return new_vector;
+    }
+
+    public int get(int index) {
+        return data.get(index);
     }
 
     @Override
