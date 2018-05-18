@@ -55,21 +55,17 @@ public class ColaBinomial implements PriorityQueue {
         this.max_index = 0;
     }
 
-    public ColaBinomial(ColaBinomial cX, ColaBinomial cY) {
-        ColaBinomial nueva_cola = suma(cX.binomial_forest, cY.binomial_forest);
+    public ColaBinomial(ColaBinomial c0, ColaBinomial c1) {
+        ColaBinomial nueva_cola = suma(c0.binomial_forest, c1.binomial_forest);
         this.binomial_forest = nueva_cola.binomial_forest;
         this.max_index = nueva_cola.max_index;
     }
 
     public void insertar(int x, int p) {
-        //System.out.println("Max index: " + this.max_index);
-        //System.out.println("previous list" + this.binomial_forest + System.lineSeparator());
         ColaBinomial cola0 =  new ColaBinomial(new Node(x, p)),
                 nueva_cola = suma(this.binomial_forest, cola0.binomial_forest);
         this.binomial_forest = nueva_cola.binomial_forest;
         this.max_index = nueva_cola.max_index;
-        //System.out.println("New index: " + this.max_index);
-        //System.out.println("Insert result" + this.binomial_forest + System.lineSeparator());
     }
 
     public Node extraer_siguiente(){

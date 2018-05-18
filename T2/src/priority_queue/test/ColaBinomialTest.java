@@ -18,6 +18,7 @@ public class ColaBinomialTest {
 
     private ColaBinomial cp1, cp2, cp3, cp4, cp5;
     private Vector<Object> vec1, vec2, vec3, vec4, vec5;
+
     @Before
     public void setUp() throws Exception {
         cp1 = new ColaBinomial();
