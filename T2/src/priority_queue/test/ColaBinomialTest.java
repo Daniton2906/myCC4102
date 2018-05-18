@@ -60,6 +60,9 @@ public class ColaBinomialTest {
             assertEquals(n2, vec1.get(i));
             assertEquals(n3, vec1.get(i));
         }
+        assertTrue(cp1.isEmpty());
+        assertTrue(cp2.isEmpty());
+        assertTrue(cp3.isEmpty());
     }
 
     @org.junit.Test
