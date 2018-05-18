@@ -13,6 +13,12 @@ public class HeapClasico implements PriorityQueue {
         heap.add(null);
     }
 
+    public HeapClasico(HeapClasico c0, HeapClasico c1) {
+        this.heap = new Vector<>(c0.heap);
+        this.heap.addAll(c1.heap.subList(1, c1.heap.size()));
+        heapify(1);
+    }
+
     public void insertar(int x, int p){
         Node new_node = new Node(x, p);
         this.heap.add(new_node);
@@ -21,12 +27,11 @@ public class HeapClasico implements PriorityQueue {
         // emerger
         while(current_parent_index != 0
                 && new_node.getPriority() > this.heap.get(current_parent_index).getPriority()) {
-            Node parent = this.heap.get(current_parent_index);
-            this.heap.set(current_parent_index, new_node);
-            this.heap.set(current_index, parent);
+            swap_nodes(current_parent_index, current_index);
             current_index = current_parent_index;
             current_parent_index = (int) Math.floor(current_index / 2.0);
         }
+        // System.out.println("Arreglo actual: " + this.heap);
     }
 
     public Node extraer_siguiente(){
@@ -36,35 +41,53 @@ public class HeapClasico implements PriorityQueue {
         Node next_node = this.heap.get(1);
         this.heap.set(1, this.heap.remove(this.heap.size() - 1));
         int current_index = 1,
-                left_index = 2*current_index,
-                right_index = 2*current_index + 1;
-        int current_child_index = right_index < this.heap.size()
-                && this.heap.get(right_index).getPriority()
-                    >= this.heap.get(left_index).getPriority()? right_index: left_index;
+                current_child_index = get_child_index(current_index);
+        //System.out.println("ci= " + current_index + "cci=" + current_child_index);
         while(current_child_index < this.heap.size()
                 && this.heap.get(current_index).getPriority() <= this.heap.get(current_child_index).getPriority()) {
-            Node currentNode = this.heap.get(current_index);
-            Node currentChildNode = this.heap.get(current_child_index);
-            this.heap.set(current_child_index, currentNode);
-            this.heap.set(current_index, currentChildNode);
+            swap_nodes(current_index, current_child_index);
+            current_index = current_child_index;
+            current_child_index = get_child_index(current_index);
         }
+        // System.out.println("Arreglo actual: " + this.heap);
         return next_node;
     }
 
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         return this.heap.size() < 2;
     }
 
-    public PriorityQueue meld(PriorityQueue c0, PriorityQueue c1) {
-        PriorityQueue new_pqueue = new HeapClasico();
-        Node node;
-        while((node = c0.extraer_siguiente()) != null) {
-            new_pqueue.insertar(node.getValue(), node.getPriority());
+    private int get_child_index(int current_index){
+        int left_index = 2*current_index,
+                right_index = 2*current_index + 1;
+        if(right_index < this.heap.size()
+                && this.heap.get(right_index).getPriority() >= this.heap.get(left_index).getPriority())
+            return right_index;
+        else
+            return left_index;
+    }
+
+    private void swap_nodes(int i, int j){
+        Node node = this.heap.get(i);
+        Node other_node = this.heap.get(j);
+        this.heap.set(j, node);
+        this.heap.set(i, other_node);
+    }
+
+    private void heapify(int index) {
+        if(index >= heap.size())
+            return;
+        heapify(2*index);
+        heapify(2*index + 1);
+        int child_idx = get_child_index(index);
+        if(child_idx < this.heap.size()) {
+            int p1 = this.heap.get(index).getPriority(),
+                p2 =  this.heap.get(child_idx).getPriority();
+            if (p1 <= p2) {
+                swap_nodes(index, child_idx);
+                heapify(child_idx);
+            }
         }
-        while((node = c1.extraer_siguiente()) != null) {
-            new_pqueue.insertar(node.getValue(), node.getPriority());
-        }
-        return new_pqueue;
     }
 
 }

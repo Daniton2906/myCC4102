@@ -10,5 +10,4 @@ public interface PriorityQueue {
 
     boolean isEmpty();
 
-    PriorityQueue meld(PriorityQueue c0, PriorityQueue c1);
 }
