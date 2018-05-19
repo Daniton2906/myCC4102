@@ -15,19 +15,6 @@ public class HeapClasico extends AbstractQueue {
         heap.add(null);
     }
 
-    public HeapClasico(List<Node> nodes) {
-        heap = new Vector<>();
-        heap.add(null);
-        heap.addAll(nodes);
-        heapify(1);
-    }
-
-    private HeapClasico(HeapClasico c0, HeapClasico c1) {
-        this.heap = new Vector<>(c0.heap);
-        this.heap.addAll(c1.heap.subList(1, c1.heap.size()));
-        heapify(1);
-    }
-
     public void insertar(int x, int p){
         Node new_node = new Node(x, p);
         this.heap.add(new_node);
@@ -40,7 +27,6 @@ public class HeapClasico extends AbstractQueue {
             current_index = current_parent_index;
             current_parent_index = (int) Math.floor(current_index / 2.0);
         }
-        // System.out.println("Arreglo actual: " + this.heap);
     }
 
     public Node extraer_siguiente(){
@@ -51,19 +37,38 @@ public class HeapClasico extends AbstractQueue {
         this.heap.set(1, this.heap.remove(this.heap.size() - 1));
         int current_index = 1,
                 current_child_index = get_child_index(current_index);
-        //System.out.println("ci= " + current_index + "cci=" + current_child_index);
         while(current_child_index < this.heap.size()
                 && this.heap.get(current_index).getPriority() <= this.heap.get(current_child_index).getPriority()) {
             swap_nodes(current_index, current_child_index);
             current_index = current_child_index;
             current_child_index = get_child_index(current_index);
         }
-        // System.out.println("Arreglo actual: " + this.heap);
         return next_node;
     }
 
     public boolean isEmpty() {
         return this.heap.size() < 2;
+    }
+
+    public PriorityQueue heapify(List<Node> nodes) {
+        HeapClasico new_queue = new HeapClasico();
+        new_queue.heap.addAll(nodes);
+        new_queue.heapify(1);
+        return new_queue;
+    }
+
+    @Override
+    public HeapClasico meld(HeapClasico c0, HeapClasico c1) {
+        HeapClasico new_hp = new HeapClasico();
+        new_hp.heap.addAll(c0.heap);
+        new_hp.heap.addAll(c1.heap.subList(1, c1.heap.size()));
+        heapify(1);
+        return new_hp;
+    }
+
+    @Override
+    public Box create(BoxFactory boxFactory) {
+        return boxFactory.createHCBox();
     }
 
     private int get_child_index(int current_index){
@@ -97,16 +102,6 @@ public class HeapClasico extends AbstractQueue {
                 heapify(child_idx);
             }
         }
-    }
-
-    @Override
-    public HeapClasico meld(HeapClasico c0, HeapClasico c1) {
-        return new HeapClasico(c0, c1);
-    }
-
-    @Override
-    public Box create(BoxFactory boxFactory) {
-        return boxFactory.createHCBox();
     }
 
 }

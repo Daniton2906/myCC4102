@@ -3,6 +3,8 @@ package priority_queue;
 import box.Box;
 import utils.Node;
 
+import java.util.List;
+
 public interface PriorityQueue {
 
     void insertar(int x, int p);
@@ -10,6 +12,8 @@ public interface PriorityQueue {
     Node extraer_siguiente();
 
     boolean isEmpty();
+
+    PriorityQueue heapify(List<Node> nodes);
 
     HeapClasico meld(HeapClasico c0, HeapClasico c1);
 

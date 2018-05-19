@@ -4,43 +4,9 @@ import box.Box;
 import utils.Node;
 
 import java.util.LinkedList;
+import java.util.List;
 
 public class ColaBinomial extends AbstractQueue {
-
-    private class Binomial_Tree {
-
-        private LinkedList<Binomial_Tree> binomial_trees;
-        private int order;
-        private Node node;
-
-
-        private Binomial_Tree(Node node) {
-            this.binomial_trees = new LinkedList<>();
-            this.order = 0;
-            this.node = node;
-        }
-
-        private Binomial_Tree(Binomial_Tree t0, Binomial_Tree t1) {
-            assert t0.order == t1.order;
-            this.binomial_trees = new LinkedList<>();
-            if(t0.node.getPriority() >= t1.node.getPriority()) {
-                this.binomial_trees.addAll(t0.binomial_trees);
-                this.binomial_trees.addLast(t1);
-                this.node = t0.node;
-                this.order = t0.order + 1;
-            } else {
-                this.binomial_trees.addAll(t1.binomial_trees);
-                this.binomial_trees.addLast(t0);
-                this.node = t1.node;
-                this.order = t1.order + 1;
-            }
-        }
-
-        @Override
-        public String toString() {
-            return "B[" + this.order + "] root " + this.node + ":" + this.binomial_trees;
-        }
-    }
 
     private LinkedList<Binomial_Tree> binomial_forest;
     private int max_index;
@@ -56,12 +22,7 @@ public class ColaBinomial extends AbstractQueue {
         this.max_index = 0;
     }
 
-    private ColaBinomial(ColaBinomial c0, ColaBinomial c1) {
-        ColaBinomial nueva_cola = suma(c0.binomial_forest, c1.binomial_forest);
-        this.binomial_forest = nueva_cola.binomial_forest;
-        this.max_index = nueva_cola.max_index;
-    }
-
+    @Override
     public void insertar(int x, int p) {
         ColaBinomial cola0 =  new ColaBinomial(new Node(x, p)),
                 nueva_cola = suma(this.binomial_forest, cola0.binomial_forest);
@@ -69,6 +30,7 @@ public class ColaBinomial extends AbstractQueue {
         this.max_index = nueva_cola.max_index;
     }
 
+    @Override
     public Node extraer_siguiente(){
         Binomial_Tree max_tree = this.binomial_forest.remove(this.max_index);
         Node max_node = max_tree.node;
@@ -80,6 +42,24 @@ public class ColaBinomial extends AbstractQueue {
 
     public boolean isEmpty(){
         return this.binomial_forest.isEmpty();
+    }
+
+    @Override
+    public ColaBinomial meld(ColaBinomial c0, ColaBinomial c1) {
+        return suma(c0.binomial_forest, c1.binomial_forest);
+    }
+
+    @Override
+    public Box create(BoxFactory boxFactory) {
+        return boxFactory.createCBBox();
+    }
+
+    @Override
+    public PriorityQueue heapify(List<Node> nodes) {
+        ColaBinomial cp = new ColaBinomial();
+        for(Node node : nodes)
+            cp.insertar(node.getValue(), node.getPriority());
+        return cp;
     }
 
     private ColaBinomial suma(LinkedList<Binomial_Tree> bfX, LinkedList<Binomial_Tree> bfY) {
@@ -134,14 +114,39 @@ public class ColaBinomial extends AbstractQueue {
         return res;
     }
 
-    @Override
-    public ColaBinomial meld(ColaBinomial c0, ColaBinomial c1) {
-        return new ColaBinomial(c0, c1);
-    }
+    private class Binomial_Tree {
 
-    @Override
-    public Box create(BoxFactory boxFactory) {
-        return boxFactory.createCBBox();
+        private LinkedList<Binomial_Tree> binomial_trees;
+        private int order;
+        private Node node;
+
+
+        private Binomial_Tree(Node node) {
+            this.binomial_trees = new LinkedList<>();
+            this.order = 0;
+            this.node = node;
+        }
+
+        private Binomial_Tree(Binomial_Tree t0, Binomial_Tree t1) {
+            assert t0.order == t1.order;
+            this.binomial_trees = new LinkedList<>();
+            if(t0.node.getPriority() >= t1.node.getPriority()) {
+                this.binomial_trees.addAll(t0.binomial_trees);
+                this.binomial_trees.addLast(t1);
+                this.node = t0.node;
+                this.order = t0.order + 1;
+            } else {
+                this.binomial_trees.addAll(t1.binomial_trees);
+                this.binomial_trees.addLast(t0);
+                this.node = t1.node;
+                this.order = t1.order + 1;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "B[" + this.order + "] root " + this.node + ":" + this.binomial_trees;
+        }
     }
 
 }

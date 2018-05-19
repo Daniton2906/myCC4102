@@ -3,45 +3,10 @@ package priority_queue;
 import box.Box;
 import utils.Node;
 
-import javax.swing.*;
 import java.util.LinkedList;
+import java.util.List;
 
 public class ColaFibonacci extends AbstractQueue {
-
-    private class Binomial_Tree {
-
-        private LinkedList<Binomial_Tree> binomial_trees;
-        private int order;
-        private Node node;
-
-
-        private Binomial_Tree(Node node) {
-            this.binomial_trees = new LinkedList<>();
-            this.order = 0;
-            this.node = node;
-        }
-
-        private Binomial_Tree(Binomial_Tree t0, Binomial_Tree t1) {
-            assert t0.order == t1.order;
-            this.binomial_trees = new LinkedList<>();
-            if(t0.node.getPriority() >= t1.node.getPriority()) {
-                this.binomial_trees.addAll(t0.binomial_trees);
-                this.binomial_trees.addLast(t1);
-                this.node = t0.node;
-                this.order = t0.order + 1;
-            } else {
-                this.binomial_trees.addAll(t1.binomial_trees);
-                this.binomial_trees.addLast(t0);
-                this.node = t1.node;
-                this.order = t1.order + 1;
-            }
-        }
-
-        @Override
-        public String toString() {
-            return "B[" + this.order + "] root " + this.node + ":" + this.binomial_trees;
-        }
-    }
 
     private LinkedList<Binomial_Tree> blforest_list;
     private int count_nodes;
@@ -53,28 +18,16 @@ public class ColaFibonacci extends AbstractQueue {
         this.count_nodes = 0;
     }
 
-    private ColaFibonacci(ColaFibonacci c0, ColaFibonacci c1) {
-        this.blforest_list = new LinkedList<>();
-        this.blforest_list.addAll(c0.blforest_list); this.blforest_list.addAll(c1.blforest_list);
-
-        Node node0 = c0.blforest_list.get(c0.max_index).node,
-                node1 = c1.blforest_list.get(c1.max_index).node;
-        if(node0.getPriority() >= node1.getPriority())
-            this.max_index = c0.max_index;
-        else
-            this.max_index = c0.blforest_list.size() + c1.max_index - 1;
-
-        this.count_nodes = c0.count_nodes + c1.count_nodes;
-    }
-
+    @Override
     public void insertar(int x, int p) {
         this.blforest_list.add(new Binomial_Tree(new Node(x, p)));
         if(max_index == -1 || p >= this.blforest_list.get(max_index).node.getPriority()) {
             this.max_index = this.blforest_list.size() - 1;
         }
-        count_nodes++;
+        this.count_nodes++;
     }
 
+    @Override
     public Node extraer_siguiente(){
         Binomial_Tree max_tree = this.blforest_list.remove(this.max_index);
         Node max_node = max_tree.node;
@@ -85,8 +38,40 @@ public class ColaFibonacci extends AbstractQueue {
         return max_node;
     }
 
+    @Override
     public boolean isEmpty() {
         return blforest_list.isEmpty();
+    }
+
+
+    @Override
+    public PriorityQueue heapify(List<Node> nodes) {
+        ColaFibonacci cp = new ColaFibonacci();
+        for(Node node : nodes)
+            cp.insertar(node.getValue(), node.getPriority());
+        return cp;
+    }
+
+    @Override
+    public ColaFibonacci meld(ColaFibonacci c0, ColaFibonacci c1) {
+        ColaFibonacci new_cf = new ColaFibonacci();
+        new_cf.blforest_list.addAll(c0.blforest_list);
+        new_cf.blforest_list.addAll(c1.blforest_list);
+
+        Node node0 = c0.blforest_list.get(c0.max_index).node,
+                node1 = c1.blforest_list.get(c1.max_index).node;
+        if(node0.getPriority() >= node1.getPriority())
+            new_cf.max_index = c0.max_index;
+        else
+            new_cf.max_index = c0.blforest_list.size() + c1.max_index - 1;
+
+        new_cf.count_nodes = c0.count_nodes + c1.count_nodes;
+        return new_cf;
+    }
+
+    @Override
+    public Box create(BoxFactory factory) {
+        return factory.createCFBox();
     }
 
     private void make_binomial_forest() {
@@ -123,14 +108,39 @@ public class ColaFibonacci extends AbstractQueue {
         }
     }
 
-    @Override
-    public ColaFibonacci meld(ColaFibonacci c0, ColaFibonacci c1) {
-        return new ColaFibonacci(c0, c1);
-    }
+    private class Binomial_Tree {
 
-    @Override
-    public Box create(BoxFactory factory) {
-        return factory.createCFBox();
+        private LinkedList<Binomial_Tree> binomial_trees;
+        private int order;
+        private Node node;
+
+
+        private Binomial_Tree(Node node) {
+            this.binomial_trees = new LinkedList<>();
+            this.order = 0;
+            this.node = node;
+        }
+
+        private Binomial_Tree(Binomial_Tree t0, Binomial_Tree t1) {
+            assert t0.order == t1.order;
+            this.binomial_trees = new LinkedList<>();
+            if(t0.node.getPriority() >= t1.node.getPriority()) {
+                this.binomial_trees.addAll(t0.binomial_trees);
+                this.binomial_trees.addLast(t1);
+                this.node = t0.node;
+                this.order = t0.order + 1;
+            } else {
+                this.binomial_trees.addAll(t1.binomial_trees);
+                this.binomial_trees.addLast(t0);
+                this.node = t1.node;
+                this.order = t1.order + 1;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "B[" + this.order + "] root " + this.node + ":" + this.binomial_trees;
+        }
     }
 
 }
