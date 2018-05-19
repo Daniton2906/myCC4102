@@ -1,6 +1,7 @@
 package main;
 
 import priority_queue.ColaBinomial;
+import priority_queue.ColaFibonacci;
 import priority_queue.HeapClasico;
 import priority_queue.PriorityQueue;
 import utils.DataManager;
@@ -17,8 +18,10 @@ public class Main {
 
         DataManager dm = new DataManager(N, 0);
         PriorityQueue heapClasico = new HeapClasico(),
-                colaBinomial = new ColaBinomial();
+                colaBinomial = new ColaBinomial(),
+                colaFibonacci = new ColaFibonacci();
         //Tester.test0(heapClasico, dm, false);
-        Tester.test0(colaBinomial, dm, true);
+        //Tester.test0(colaBinomial, dm, false);
+        Tester.test0(colaFibonacci, dm, false);
     }
 }

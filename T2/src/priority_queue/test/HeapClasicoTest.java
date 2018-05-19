@@ -71,7 +71,7 @@ public class HeapClasicoTest {
             cp4.insertar((int) vec4.get(i), (int) vec4.get(i));
             cp5.insertar((int) vec5.get(i), (int) vec5.get(i));
         }
-        HeapClasico cp6 = new HeapClasico(cp4, cp5);
+        HeapClasico cp6 = cp4.meld(cp4, cp5);
         for (int i = 0; i < 10; i++) {
             assertEquals(cp6.extraer_siguiente().getValue(), vec1.get(i));
         }

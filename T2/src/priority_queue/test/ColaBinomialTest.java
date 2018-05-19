@@ -72,7 +72,7 @@ public class ColaBinomialTest {
             cp4.insertar((int) vec4.get(i), (int) vec4.get(i));
             cp5.insertar((int) vec5.get(i), (int) vec5.get(i));
         }
-        PriorityQueue cp6 = new ColaBinomial(cp4, cp5);
+        PriorityQueue cp6 = cp4.meld(cp4, cp5);
         for (int i = 0; i < 10; i++) {
             assertEquals(cp6.extraer_siguiente().getValue(), vec1.get(i));
         }
