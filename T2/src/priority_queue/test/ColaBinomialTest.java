@@ -85,9 +85,9 @@ public class ColaBinomialTest {
         DataManager dm = new DataManager(10000, 0);
         PriorityQueue cp = new ColaBinomial();
         for (int i = 0; i < n_test; i++) {
-            Vector<Node> vec = dm.getSuffleData();
-            for(Node node: vec){
-                cp.insertar(node.getValue(), node.getPriority());
+            Vector<Integer> vec = dm.getSuffleData();
+            for(int num: vec){
+                cp.insertar(num, num);
             }
             for (int j = 0; !cp.isEmpty(); j++) {
                 assertEquals(cp.extraer_siguiente().getValue(), dm.get(j));
