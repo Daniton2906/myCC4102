@@ -33,7 +33,7 @@ public class DataManager {
         return new_vector;
     }
 
-    public Vector<Node> toNodeArray(List<Integer> ints) {
+    static public Vector<Node> toNodeArray(List<Integer> ints) {
         Vector<Node> new_vector = new Vector<>();
         for (int i: ints) {
             new_vector.add(new Node(i));

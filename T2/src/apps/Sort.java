@@ -1,26 +1,33 @@
 package apps;
 
 import priority_queue.PriorityQueue;
+import utils.DataManager;
 import utils.Node;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Vector;
 
 public class Sort {
 
     private List<Node> nodes;
     private PriorityQueue cp;
 
-    public Sort(List<Node> nodes, PriorityQueue cp) {
-        this.nodes = nodes;
-        this.cp = cp.heapify(nodes);
+    public Sort(List<Integer> array, PriorityQueue cp) {
+        this.cp = cp;
+        this.nodes = DataManager.toNodeArray(array);
     }
 
-    public void sort() {
-        int k = 0;
+    public void heapify() {
+        this.cp = cp.heapify(this.nodes);
+    }
+
+    public List<Node> sort() {
+        Vector<Node> sorted = new Vector<>();
         while (!cp.isEmpty()) {
-            nodes.set(k, cp.extraer_siguiente());
-            k++;
+            sorted.add(cp.extraer_siguiente());
         }
+        return sorted;
     }
 
 }
