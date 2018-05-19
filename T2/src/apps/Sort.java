@@ -1,6 +1,5 @@
 package apps;
 
-import priority_queue.HeapClasico;
 import priority_queue.PriorityQueue;
 import utils.Node;
 
@@ -13,15 +12,7 @@ public class Sort {
 
     public Sort(List<Node> nodes, PriorityQueue cp) {
         this.nodes = nodes;
-        this.cp = cp;
-        for(Node node : nodes)
-            cp.insertar(node.getValue(), node.getPriority());
-
-    }
-
-    public Sort(List<Node> nodes) {
-        this.nodes = nodes;
-        this.cp = new HeapClasico(nodes);
+        this.cp = cp.heapify(nodes);
     }
 
     public void sort() {
