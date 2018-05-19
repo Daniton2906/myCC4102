@@ -60,9 +60,9 @@ public class HeapClasico extends AbstractQueue {
     @Override
     public HeapClasico meld(HeapClasico c0, HeapClasico c1) {
         HeapClasico new_hp = new HeapClasico();
-        new_hp.heap.addAll(c0.heap);
+        new_hp.heap.addAll(c0.heap.subList(1, c0.heap.size()));
         new_hp.heap.addAll(c1.heap.subList(1, c1.heap.size()));
-        heapify(1);
+        new_hp.heapify(1);
         return new_hp;
     }
 
