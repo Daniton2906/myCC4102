@@ -1,5 +1,6 @@
 package priority_queue;
 
+import box.Box;
 import utils.Node;
 
 public interface PriorityQueue {
@@ -10,4 +11,15 @@ public interface PriorityQueue {
 
     boolean isEmpty();
 
+    HeapClasico meld(HeapClasico c0, HeapClasico c1);
+
+    ColaBinomial meld(ColaBinomial c0, ColaBinomial c1);
+
+    ColaFibonacci meld(ColaFibonacci c0, ColaFibonacci c1);
+
+    LeftistHeap meld(LeftistHeap c0, LeftistHeap c1);
+
+    SkewHeap meld(SkewHeap c0, SkewHeap c1);
+
+    Box create(BoxFactory boxFactory);
 }

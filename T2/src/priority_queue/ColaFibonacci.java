@@ -1,10 +1,12 @@
 package priority_queue;
 
+import box.Box;
 import utils.Node;
 
+import javax.swing.*;
 import java.util.LinkedList;
 
-public class ColaFibonacci implements PriorityQueue {
+public class ColaFibonacci extends AbstractQueue {
 
     private class Binomial_Tree {
 
@@ -51,7 +53,7 @@ public class ColaFibonacci implements PriorityQueue {
         this.count_nodes = 0;
     }
 
-    public ColaFibonacci(ColaFibonacci c0, ColaFibonacci c1) {
+    private ColaFibonacci(ColaFibonacci c0, ColaFibonacci c1) {
         this.blforest_list = new LinkedList<>();
         this.blforest_list.addAll(c0.blforest_list); this.blforest_list.addAll(c1.blforest_list);
 
@@ -119,6 +121,16 @@ public class ColaFibonacci implements PriorityQueue {
                 }
             }
         }
+    }
+
+    @Override
+    public ColaFibonacci meld(ColaFibonacci c0, ColaFibonacci c1) {
+        return new ColaFibonacci(c0, c1);
+    }
+
+    @Override
+    public Box create(BoxFactory factory) {
+        return factory.createCFBox();
     }
 
 }

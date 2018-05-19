@@ -1,8 +1,9 @@
 package priority_queue;
 
+import box.Box;
 import utils.Node;
 
-public class SkewHeap implements PriorityQueue {
+public class SkewHeap extends AbstractQueue {
 
     public void insertar(int x, int p){}
 
@@ -12,5 +13,13 @@ public class SkewHeap implements PriorityQueue {
         return true;
     }
 
-    public PriorityQueue meld(PriorityQueue c0, PriorityQueue c1){return null;}
+    @Override
+    public SkewHeap meld(SkewHeap c0, SkewHeap c1) {
+        return super.meld(c0, c1);
+    }
+
+    @Override
+    public Box create(BoxFactory factory) {
+        return factory.createSHBox();
+    }
 }

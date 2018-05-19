@@ -1,10 +1,12 @@
 package priority_queue;
 
+import box.Box;
 import utils.Node;
 
+import java.util.List;
 import java.util.Vector;
 
-public class HeapClasico implements PriorityQueue {
+public class HeapClasico extends AbstractQueue {
 
     private Vector<Node> heap;
 
@@ -13,7 +15,14 @@ public class HeapClasico implements PriorityQueue {
         heap.add(null);
     }
 
-    public HeapClasico(HeapClasico c0, HeapClasico c1) {
+    public HeapClasico(List<Node> nodes) {
+        heap = new Vector<>();
+        heap.add(null);
+        heap.addAll(nodes);
+        heapify(1);
+    }
+
+    private HeapClasico(HeapClasico c0, HeapClasico c1) {
         this.heap = new Vector<>(c0.heap);
         this.heap.addAll(c1.heap.subList(1, c1.heap.size()));
         heapify(1);
@@ -88,6 +97,16 @@ public class HeapClasico implements PriorityQueue {
                 heapify(child_idx);
             }
         }
+    }
+
+    @Override
+    public HeapClasico meld(HeapClasico c0, HeapClasico c1) {
+        return new HeapClasico(c0, c1);
+    }
+
+    @Override
+    public Box create(BoxFactory boxFactory) {
+        return boxFactory.createHCBox();
     }
 
 }

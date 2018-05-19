@@ -1,8 +1,9 @@
 package priority_queue;
 
+import box.Box;
 import utils.Node;
 
-public class LeftistHeap implements PriorityQueue{
+public class LeftistHeap extends AbstractQueue {
 
     public void insertar(int x, int p){}
 
@@ -12,5 +13,13 @@ public class LeftistHeap implements PriorityQueue{
         return true;
     }
 
-    public PriorityQueue meld(PriorityQueue c0, PriorityQueue c1){return null;}
+    @Override
+    public LeftistHeap meld(LeftistHeap c0, LeftistHeap c1) {
+        return super.meld(c0, c1);
+    }
+
+    @Override
+    public Box create(BoxFactory factory) {
+        return factory.createLHBox();
+    }
 }

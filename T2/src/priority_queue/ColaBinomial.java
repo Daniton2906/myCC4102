@@ -1,10 +1,11 @@
 package priority_queue;
 
+import box.Box;
 import utils.Node;
 
 import java.util.LinkedList;
 
-public class ColaBinomial implements PriorityQueue {
+public class ColaBinomial extends AbstractQueue {
 
     private class Binomial_Tree {
 
@@ -55,7 +56,7 @@ public class ColaBinomial implements PriorityQueue {
         this.max_index = 0;
     }
 
-    public ColaBinomial(ColaBinomial c0, ColaBinomial c1) {
+    private ColaBinomial(ColaBinomial c0, ColaBinomial c1) {
         ColaBinomial nueva_cola = suma(c0.binomial_forest, c1.binomial_forest);
         this.binomial_forest = nueva_cola.binomial_forest;
         this.max_index = nueva_cola.max_index;
@@ -131,6 +132,16 @@ public class ColaBinomial implements PriorityQueue {
             res += (int) Math.pow(2, bt.order);
         }
         return res;
+    }
+
+    @Override
+    public ColaBinomial meld(ColaBinomial c0, ColaBinomial c1) {
+        return new ColaBinomial(c0, c1);
+    }
+
+    @Override
+    public Box create(BoxFactory boxFactory) {
+        return boxFactory.createCBBox();
     }
 
 }
