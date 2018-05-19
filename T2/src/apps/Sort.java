@@ -19,6 +19,7 @@ public class Sort {
         int k = 0;
         while (!cp.isEmpty()) {
             nodes.set(k, cp.extraer_siguiente());
+            k++;
         }
     }
 
