@@ -5,6 +5,11 @@ public class Node implements Comparable<Node>{
     private final int value;
     private final int priority;
 
+    public Node(int v) {
+        this.value = v;
+        this.priority = v;
+    }
+
     public Node(int x, int y) {
         this.value = x;
         this.priority = y;
