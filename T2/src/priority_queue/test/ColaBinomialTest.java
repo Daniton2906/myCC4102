@@ -7,6 +7,7 @@ import org.junit.runners.MethodSorters;
 import priority_queue.ColaBinomial;
 import priority_queue.PriorityQueue;
 import utils.DataManager;
+import utils.Node;
 
 import java.util.Arrays;
 import java.util.Vector;
@@ -84,9 +85,9 @@ public class ColaBinomialTest {
         DataManager dm = new DataManager(10000, 0);
         PriorityQueue cp = new ColaBinomial();
         for (int i = 0; i < n_test; i++) {
-            Vector<Integer> vec = dm.getSuffleData();
-            for(int num: vec){
-                cp.insertar(num, num);
+            Vector<Node> vec = dm.getSuffleData();
+            for(Node node: vec){
+                cp.insertar(node.getValue(), node.getPriority());
             }
             for (int j = 0; !cp.isEmpty(); j++) {
                 assertEquals(cp.extraer_siguiente().getValue(), dm.get(j));
