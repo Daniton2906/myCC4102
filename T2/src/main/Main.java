@@ -19,7 +19,7 @@ public class Main {
                 colaFibonacci = new ColaFibonacci(),
                 leftistheap = new LeftistHeap(),
                 skewheap = new SkewHeap();
-        
+
         //Tester.test0(heapClasico, dm, false);
         //Tester.test0(colaBinomial, dm, false);
         Tester.test0(colaFibonacci, dm, false);
