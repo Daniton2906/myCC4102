@@ -28,6 +28,7 @@ public class SkewHeap extends AbstractQueue {
 
     private void copy(SkewHeap LT) {
         this.root = LT.root;
+        this.empty = LT.empty;
 
         this.lt_der = LT.lt_der;
         this.lt_izq = LT.lt_izq;
@@ -36,8 +37,10 @@ public class SkewHeap extends AbstractQueue {
 
     public void insertar(int x, int p){
         SkewHeap new_heap = new SkewHeap(x, p);
+        SkewHeap act_heap = new SkewHeap();
+        act_heap.copy(this);
 
-        SkewHeap result_heap = this.meld(this, new_heap);
+        SkewHeap result_heap = this.meld(act_heap, new_heap);
         this.copy(result_heap);
 
     }
@@ -57,31 +60,39 @@ public class SkewHeap extends AbstractQueue {
 
     @Override
     public SkewHeap meld(SkewHeap c0, SkewHeap c1) {
-        if(c0.isEmpty())
+        if(c0.isEmpty()) {
             return c1;
-        if(c1.isEmpty())
+        }
+
+        if(c1.isEmpty()) {
             return c0;
+        }
 
         Node r0 = c0.root, r1 = c1.root;
         SkewHeap result, new_lt;
 
         if(r0.getPriority() > r1.getPriority()) {
             result = this.meld(c0.lt_der, c1);
-            c0.lt_der = result;
 
-            new_lt = c0;
-            new_lt.h = Math.min(c0.lt_der.h, c0.lt_izq.h) + 1;
+            new_lt = new SkewHeap();
+            new_lt.root = r0;
+            new_lt.lt_der= c0.lt_izq;
+            new_lt.lt_izq = result;
+
+            new_lt.h = Math.min(result.h, c0.lt_izq.h) + 1;
+
         } else {
-            result = this.meld(c1.lt_der, c0);
-            c1.lt_der = result;
+            result = this.meld(c0, c1.lt_der);
 
-            new_lt = c1;
-            new_lt.h = Math.min(c1.lt_der.h, c1.lt_izq.h) + 1;
+            new_lt = new SkewHeap();
+            new_lt.root = r1;
+            new_lt.lt_der= c1.lt_izq;
+            new_lt.lt_izq = result;
+
+            new_lt.h = Math.min(result.h, c1.lt_izq.h) + 1;
+
         }
-
-        SkewHeap aux = new_lt.lt_der;
-        new_lt.lt_der = new_lt.lt_izq;
-        new_lt.lt_izq = aux;
+        new_lt.empty = false;
 
         return new_lt;
     }
