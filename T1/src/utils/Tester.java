@@ -109,19 +109,19 @@ public class Tester {
         for (int k = size - 1; k >= 0; k--) {
             dict.delete(chain_array.get(k));
             if(checkpoints.contains(k + 1)) {
-                int us_d = dict.getUsedSpace(),
-                        ios_d = dict.getIOs();
-                System.out.println("Checkpoint borrar hasta " + (k + 1) + " claves");
-                System.out.println("Espacio por bloque put en checkpoint " + (k + 1) + ": " + us_d);
-                System.out.println("IOs put en checkpoint " + (k + 1) + ": " + ios_d);
-                results.get(w).add(us_d);
-                results.get(w).add(ios_d);
-                totalIOs += dict.getIOs();
-                dict.resetIOCounter();
-                w--;
-            }
+            int us_d = dict.getUsedSpace(),
+                    ios_d = dict.getIOs();
+            System.out.println("Checkpoint borrar hasta " + (k + 1) + " claves");
+            System.out.println("Espacio por bloque put en checkpoint " + (k + 1) + ": " + us_d);
+            System.out.println("IOs put en checkpoint " + (k + 1) + ": " + ios_d);
+            results.get(w).add(us_d);
+            results.get(w).add(ios_d);
+            totalIOs += dict.getIOs();
+            dict.resetIOCounter();
+            w--;
         }
-        totalIOs += dict.getIOs();
+    }
+    totalIOs += dict.getIOs();
         System.out.println("IOs totales para vaciar dict: " + totalIOs);
         System.out.println("IOs totales para vaciar dict desde" + checkpoints.get(0) + ": " + dict.getIOs());
         results.get(results.size() - 1).add(dict.getIOs());
@@ -129,16 +129,16 @@ public class Tester {
         dict.resetIOCounter();
         checkpoints.add(size);
 
-        String btree_filename = "/T1/results/" + name + System.currentTimeMillis() + ".tsv";
-        String fileName = System.getProperty("user.dir") + btree_filename;
+    String btree_filename = "/T1/results/" + name + System.currentTimeMillis() + ".tsv";
+    String fileName = System.getProperty("user.dir") + btree_filename;
 
-        File fd = new File(fileName);
+    File fd = new File(fileName);
         fd.getParentFile().mkdir();
         fd.createNewFile();
-        BufferedWriter writer = new BufferedWriter(new FileWriter(fd));
+    BufferedWriter writer = new BufferedWriter(new FileWriter(fd));
 
         System.out.println("############################## REPORT ###########################################################");
-        String header = "i \t 2^i \t space_put \t ios_put \t ios_search_in \t ios_search_out \t space_delete \t ios_delete" + System.lineSeparator();
+    String header = "i \t 2^i \t space_put \t ios_put \t ios_search_in \t ios_search_out \t space_delete \t ios_delete" + System.lineSeparator();
         System.out.print(header);
         writer.write(header);
         for(int i = 0; i < results.size(); i++){

@@ -3,6 +3,8 @@ package priority_queue;
 import box.Box;
 import utils.Node;
 
+import java.util.List;
+
 public class SkewHeap extends AbstractQueue {
 
     boolean empty = true;
@@ -95,6 +97,14 @@ public class SkewHeap extends AbstractQueue {
         new_lt.empty = false;
 
         return new_lt;
+    }
+
+    @Override
+    public PriorityQueue heapify(List<Node> nodes) {
+        SkewHeap cp = new SkewHeap();
+        for(Node node : nodes)
+            cp.insertar(node.getValue(), node.getPriority());
+        return cp;
     }
 
     @Override

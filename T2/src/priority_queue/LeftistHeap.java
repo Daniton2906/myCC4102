@@ -3,6 +3,8 @@ package priority_queue;
 import box.Box;
 import utils.Node;
 
+import java.util.List;
+
 public class LeftistHeap extends AbstractQueue {
 
     boolean empty = true;
@@ -104,6 +106,14 @@ public class LeftistHeap extends AbstractQueue {
         new_lt.empty = false;
 
         return new_lt;
+    }
+
+    @Override
+    public PriorityQueue heapify(List<Node> nodes) {
+        LeftistHeap cp = new LeftistHeap();
+        for(Node node : nodes)
+            cp.insertar(node.getValue(), node.getPriority());
+        return cp;
     }
 
     @Override
