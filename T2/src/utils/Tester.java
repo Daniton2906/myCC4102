@@ -9,7 +9,7 @@ import java.util.Vector;
 public class Tester {
 
     static public void test0(PriorityQueue c, DataManager dm, boolean debug) {
-        System.out.println(dm.toString());
+        //System.out.println(dm.toString());
         Vector<Integer> vec0 = dm.getSuffleData(),
                 vec1= dm.getSuffleData(),
                 vec2 = dm.getSuffleData();

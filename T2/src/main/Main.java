@@ -20,10 +20,19 @@ public class Main {
                 leftistheap = new LeftistHeap(),
                 skewheap = new SkewHeap();
 
-        //Tester.test0(heapClasico, dm, false);
-        //Tester.test0(colaBinomial, dm, false);
+        System.out.println("  Test heap clasico");
+        Tester.test0(heapClasico, dm, false);
+
+        System.out.println("  Test cola binomial");
+        Tester.test0(colaBinomial, dm, false);
+
+        System.out.println("  Test cola fibonacci");
         Tester.test0(colaFibonacci, dm, false);
-        //Tester.test0(letistheap, dm, false);
-        //Tester.test0(skewheap, dm, false);
+
+        System.out.println("  Test leftist heap");
+        Tester.test0(leftistheap, dm, false);
+
+        System.out.println("  Test skew heap");
+        Tester.test0(skewheap, dm, false);
     }
 }
