@@ -22,10 +22,10 @@ public class Sort {
         this.cp = cp.heapify(this.nodes);
     }
 
-    public List<Node> sort() {
-        Vector<Node> sorted = new Vector<>();
+    public List<Integer> sort() {
+        Vector<Integer> sorted = new Vector<>();
         while (!cp.isEmpty()) {
-            sorted.add(cp.extraer_siguiente());
+            sorted.add(cp.extraer_siguiente().getValue());
         }
         return sorted;
     }

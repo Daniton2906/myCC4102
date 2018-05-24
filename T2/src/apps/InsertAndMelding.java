@@ -10,11 +10,11 @@ import java.util.List;
 
 public class InsertAndMelding {
 
-    private List<List<Node>> nodes_list;
+    private List<List<Integer>> nodes_list;
     private Box box;
     private BoxFactory factory;
 
-    public InsertAndMelding(int i, List<Node> nodes) {
+    public InsertAndMelding(int i, List<Integer> nodes) {
         int k = (int) Math.pow(2, i);
         nodes_list = new LinkedList<>();
         for(int j = 0; j < nodes.size(); j += k) {
@@ -26,10 +26,10 @@ public class InsertAndMelding {
     public void insercion(PriorityQueue cp) {
         assert box == null;
         this.box = factory.create(cp);
-        for (List<Node> nodes: nodes_list) {
+        for (List<Integer> subarray: nodes_list) {
             this.box.new_queue();
-            for (Node node: nodes) {
-                this.box.get(box.size() - 1).insertar(node.getValue(), node.getPriority());
+            for (int num: subarray) {
+                this.box.get(box.size() - 1).insertar(num, num);
             }
         }
     }
