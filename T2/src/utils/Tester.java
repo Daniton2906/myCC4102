@@ -2,7 +2,6 @@ package utils;
 
 import priority_queue.PriorityQueue;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
@@ -10,21 +9,30 @@ import java.util.Vector;
 public class Tester {
 
     static public void test0(PriorityQueue c, DataManager dm, boolean debug) {
-        System.out.println("Original array: " + dm.toString());
-        Vector<Integer> vec;
-        for(int i = 0; i < 3; i++) {
-            vec = dm.getSuffleData();
-            System.out.println("Shuffled array: " + vec.toString());
-            for(int num: vec){
-                c.insertar(num, num);
-            }
-            System.out.print("Final array: [ ");
-            while(!c.isEmpty()){
-                System.out.print(c.extraer_siguiente().getValue() + " ");
-            }
-            System.out.println("]");
+        //System.out.println(dm.toString());
+        Vector<Integer> vec0 = dm.getSuffleData(),
+                vec1= dm.getSuffleData(),
+                vec2 = dm.getSuffleData();
+        System.out.println(vec0.toString());
+        for(Object num: vec0){
+            c.insertar((int) num, (int) num);
+        }
+        while(!c.isEmpty()){
+            System.out.println(c.extraer_siguiente().getValue());
+        }
+        System.out.println(vec1.toString());
+        for(Object num: vec1){
+            c.insertar((int) num, (int) num);
+        }
+        while(!c.isEmpty()){
+            System.out.println(c.extraer_siguiente().getValue());
+        }
+        System.out.println(vec2.toString());
+        for(Object num: vec2){
+            c.insertar((int) num, (int) num);
+        }
+        while(!c.isEmpty()){
+            System.out.println(c.extraer_siguiente().getValue());
         }
     }
-
-    //static
 }
