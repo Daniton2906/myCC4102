@@ -11,7 +11,7 @@ public class Main {
     private static final int N = 10;
 
     public static void main (String [ ] args) throws IOException {
-        System.out.println("Hello World");
+        System.out.println("Ejecucion Main");
 
         DataManager dm = new DataManager(N, 0);
         PriorityQueue heapClasico = new HeapClasico(),
