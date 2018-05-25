@@ -23,17 +23,19 @@ public class Main {
         //Tester.test0(heapClasico, dm, false);
         //Tester.test0(colaBinomial, dm, false);
         //Tester.test0(colaFibonacci, dm, false);
+        //Tester.test0(leftistHeap, dm, false);
+        //Tester.test0(skewHeap, dm, false)
 
-       // Tester.sort_test(heapClasico, false, "heap-clasico");
+        Tester.sort_test(heapClasico, false, "heap-clasico");
         Tester.sort_test(colaBinomial, false, "cola-binomial");
         Tester.sort_test(colaFibonacci, false, "cola-fibonacci");
-        //Tester.sort_test(leftistHeap, false, "leftist-heap");
-        //Tester.sort_test(skewHeap, false, "skew-heap");
+        Tester.sort_test(leftistHeap, false, "leftist-heap");
+        Tester.sort_test(skewHeap, false, "skew-heap");
 
-        //Tester.insert_and_melding_test(heapClasico, false, "heap-clasico");
+        Tester.insert_and_melding_test(heapClasico, false, "heap-clasico");
         Tester.insert_and_melding_test(colaBinomial, false, "cola-binomial");
         Tester.insert_and_melding_test(colaFibonacci, false, "cola-fibonacci");
-        //Tester.insert_and_melding_test(leftistHeap, false, "leftist-heap");
-        //Tester.insert_and_melding_test(skewHeap, false, "skew-heap");
+        Tester.insert_and_melding_test(leftistHeap, false, "leftist-heap");
+        Tester.insert_and_melding_test(skewHeap, false, "skew-heap");
     }
 }
