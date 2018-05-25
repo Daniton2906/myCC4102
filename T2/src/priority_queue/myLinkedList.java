@@ -144,7 +144,7 @@ public class myLinkedList {
             this.count_nodes = other_list.count_nodes;
             this.max = other_list.max;
         } else if(!other_list.isEmpty()) {
-            assert this.max != null && other_list.max != null;
+
             LinkedNode prev_last = this.first.prev,
                     prev_first = other_list.first,
                     new_last = prev_first.prev;
@@ -155,7 +155,7 @@ public class myLinkedList {
 
             this.size += other_list.size;
             this.count_nodes += other_list.count_nodes;
-            this.max = other_list.max.value.compareTo(this.max.value) > 0? other_list.max : this.max;
+            this.max = this.max == null || other_list.max.value.compareTo(this.max.value) > 0? other_list.max : this.max;
         }
     }
 

@@ -54,7 +54,7 @@ public class BinomialTree implements Comparable<BinomialTree> {
 
     @Override
     public String toString() {
-        return "B[" + this.order + "] root " + this.node + ":" + this.binomial_trees;
+        return "B[" + this.order + "] root " + this.node + ": (" + this.binomial_trees + ")";
     }
 
     @Override
