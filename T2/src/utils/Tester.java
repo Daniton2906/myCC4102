@@ -8,8 +8,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
@@ -39,8 +37,8 @@ public class Tester {
     }
 
     static public void sort_test(PriorityQueue cp, boolean debug, String name) throws IOException {
-        String btree_filename = "/T2/results/sort/" + name + "-sort-" + System.currentTimeMillis() + ".tsv";
-        String fileName = System.getProperty("user.dir") + btree_filename;
+        String cp_filename = "/T2/results/sort/" + name + "-sort-" + System.currentTimeMillis() + ".tsv";
+        String fileName = System.getProperty("user.dir") + cp_filename;
 
         File fd = new File(fileName);
         fd.getParentFile().mkdir();
@@ -84,8 +82,8 @@ public class Tester {
     }
 
     static public void insert_and_melding_test(PriorityQueue cp, boolean debug, String name) throws IOException {
-        String btree_filename = "/T2/results/ins_meld/" + name + "-ins_meld-" + System.currentTimeMillis() + ".tsv";
-        String fileName = System.getProperty("user.dir") + btree_filename;
+        String cp_filename = "/T2/results/ins_meld/" + name + "-ins_meld-" + System.currentTimeMillis() + ".tsv";
+        String fileName = System.getProperty("user.dir") + cp_filename;
 
         File fd = new File(fileName);
         fd.getParentFile().mkdir();
