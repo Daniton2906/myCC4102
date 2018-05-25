@@ -9,19 +9,16 @@ import java.util.List;
 public class ColaBinomial extends AbstractQueue {
 
     private myLinkedList binomial_forest;
-    private int max_index;
     private int node_counter;
 
     public ColaBinomial() {
         this.binomial_forest = new myLinkedList();
-        this.max_index = -1;
         this.node_counter = 0;
     }
 
     private ColaBinomial(Node node) {
         this.binomial_forest = new myLinkedList();
         this.binomial_forest.addFirst(new BinomialTree(node));
-        this.max_index = 0;
         this.node_counter = 1;
     }
 
@@ -30,7 +27,6 @@ public class ColaBinomial extends AbstractQueue {
         ColaBinomial cola0 =  new ColaBinomial(new Node(x, p)),
                 nueva_cola = suma(this.binomial_forest, cola0.binomial_forest);
         this.binomial_forest = nueva_cola.binomial_forest;
-        this.max_index = nueva_cola.max_index;
         this.node_counter++;
     }
 
@@ -40,7 +36,6 @@ public class ColaBinomial extends AbstractQueue {
         Node max_node = max_tree.getNode();
         ColaBinomial nueva_cola = suma(this.binomial_forest, max_tree.getBinTrees());
         this.binomial_forest = nueva_cola.binomial_forest;
-        this.max_index = nueva_cola.max_index;
         this.node_counter = nueva_cola.node_counter;
         return max_node;
     }
