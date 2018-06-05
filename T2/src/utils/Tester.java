@@ -19,6 +19,27 @@ public class Tester {
     private static final int MAX_EXP_INS_MEL = 15; //15
     private static final int MAX_EXP = 20; //20
 
+    static private File createFile(String abs_path, String filename) {
+        File dir = new File(abs_path);
+        if(!dir.exists() && !dir.mkdir()) {
+            System.out.println("Error al crear " + abs_path);
+            System.exit(0);
+        }
+
+        File fd = new File(dir, filename);
+        // the rest of your code
+        try {
+            if (fd.createNewFile()) {
+                System.out.println("created new fle");
+            } else {
+                System.out.println("could not create a new file");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return fd;
+    }
+
     static public void test0(PriorityQueue c, DataManager dm, boolean debug) {
         System.out.println("Original array: " + dm.toString());
         Vector<Integer> vec;
@@ -37,12 +58,11 @@ public class Tester {
     }
 
     static public void sort_test(PriorityQueue cp, boolean debug, String name) throws IOException {
-        String cp_filename = "/T2/results/sort/" + name + "-sort-" + System.currentTimeMillis() + ".tsv";
-        String fileName = System.getProperty("user.dir") + cp_filename;
+        String cp_filename = name + "-sort-" + System.currentTimeMillis() + ".tsv",
+            cp_absolute_path = new File("").getAbsolutePath() + "/T2/results/sort/";
 
-        File fd = new File(fileName);
-        fd.getParentFile().mkdir();
-        fd.createNewFile();
+        File fd = createFile(cp_absolute_path, cp_filename);
+
         BufferedWriter writer = new BufferedWriter(new FileWriter(fd));
 
         String header = "i\t2^i\theapify_time\textract_time" + System.lineSeparator();
@@ -74,20 +94,18 @@ public class Tester {
         }
 
         writer.write(sb.toString());
-        System.out.println("Escribiendo resultados en " +  fileName + "...");
-        System.out.println("");
+        System.out.println("Escribiendo resultados en " +  cp_absolute_path + cp_filename + "...");
+        System.out.println();
         System.out.println("############################## REPORT (" + name + "-sort) ###########################################################");
         System.out.println(sb.toString());
         writer.close();
     }
 
     static public void insert_and_melding_test(PriorityQueue cp, boolean debug, String name) throws IOException {
-        String cp_filename = "/T2/results/ins_meld/" + name + "-ins_meld-" + System.currentTimeMillis() + ".tsv";
-        String fileName = System.getProperty("user.dir") + cp_filename;
+        String cp_absolute_path = new File("").getAbsolutePath() + "/T2/results/ins_meld/",
+                cp_filename = name + "-ins_meld-" + System.currentTimeMillis() + ".tsv";
 
-        File fd = new File(fileName);
-        fd.getParentFile().mkdir();
-        fd.createNewFile();
+        File fd = createFile(cp_absolute_path, cp_filename);
         BufferedWriter writer = new BufferedWriter(new FileWriter(fd));
 
         String header = "i\tn=2^" + MAX_EXP + "\tk=2^i\tinsert_time\tmelding_time" + System.lineSeparator();
@@ -123,7 +141,7 @@ public class Tester {
         }
 
         writer.write(sb.toString());
-        System.out.println("Escribiendo resultados en " +  fileName + "...");
+        System.out.println("Escribiendo resultados en " +  cp_absolute_path + "...");
         System.out.println("");
         System.out.println("############################## REPORT (" + name + "-ins_meld) ###########################################################");
         System.out.println(sb.toString());

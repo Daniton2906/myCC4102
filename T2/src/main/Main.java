@@ -5,6 +5,7 @@ import priority_queue.*;
 import utils.DataManager;
 import utils.Tester;
 
+import java.io.File;
 import java.io.IOException;
 
 public class Main {
@@ -13,6 +14,15 @@ public class Main {
 
     public static void main (String [ ] args) throws IOException {
         System.out.println("Hello World");
+
+        String results_folder = "/T2/results";
+
+        File dir = new File(new File("").getAbsolutePath() + results_folder);
+        System.out.println("Resultados en " + dir);
+
+        if (!dir.exists() && !dir.mkdir())
+            System.exit(0);
+        System.out.println("Iniciando testing...");
 
         DataManager dm = new DataManager(N, 0);
         PriorityQueue heapClasico = new HeapClasico(),
@@ -26,16 +36,19 @@ public class Main {
         //Tester.test0(leftistHeap, dm, false);
         //Tester.test0(skewHeap, dm, false)
 
-        Tester.sort_test(heapClasico, false, "heap-clasico");
-        Tester.sort_test(colaBinomial, false, "cola-binomial");
-        Tester.sort_test(colaFibonacci, false, "cola-fibonacci");
-        Tester.sort_test(leftistHeap, false, "leftist-heap");
-        Tester.sort_test(skewHeap, false, "skew-heap");
+        int N_TESTS = 1;
+        for (int i = 0; i < N_TESTS; i++) {
+            Tester.sort_test(heapClasico, false, "heap-clasico");
+            Tester.sort_test(colaBinomial, false, "cola-binomial");
+            Tester.sort_test(colaFibonacci, false, "cola-fibonacci");
+            Tester.sort_test(leftistHeap, false, "leftist-heap");
+            Tester.sort_test(skewHeap, false, "skew-heap");
 
-        Tester.insert_and_melding_test(heapClasico, false, "heap-clasico");
-        Tester.insert_and_melding_test(colaBinomial, false, "cola-binomial");
-        Tester.insert_and_melding_test(colaFibonacci, false, "cola-fibonacci");
-        Tester.insert_and_melding_test(leftistHeap, false, "leftist-heap");
-        Tester.insert_and_melding_test(skewHeap, false, "skew-heap");
+            Tester.insert_and_melding_test(heapClasico, false, "heap-clasico");
+            Tester.insert_and_melding_test(colaBinomial, false, "cola-binomial");
+            Tester.insert_and_melding_test(colaFibonacci, false, "cola-fibonacci");
+            Tester.insert_and_melding_test(leftistHeap, false, "leftist-heap");
+            Tester.insert_and_melding_test(skewHeap, false, "skew-heap");
+        }
     }
 }
