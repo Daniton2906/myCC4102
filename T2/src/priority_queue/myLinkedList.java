@@ -144,7 +144,6 @@ public class myLinkedList {
             this.count_nodes = other_list.count_nodes;
             this.max = other_list.max;
         } else if(!other_list.isEmpty()) {
-
             LinkedNode prev_last = this.first.prev,
                     prev_first = other_list.first,
                     new_last = prev_first.prev;
