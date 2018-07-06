@@ -36,7 +36,7 @@ public class Main {
         //Tester.test0(leftistHeap, dm, false);
         //Tester.test0(skewHeap, dm, false)
 
-        int N_TESTS = 1;
+        int N_TESTS = 100;
         for (int i = 0; i < N_TESTS; i++) {
             Tester.sort_test(heapClasico, false, "heap-clasico");
             Tester.sort_test(colaBinomial, false, "cola-binomial");
@@ -50,5 +50,8 @@ public class Main {
             Tester.insert_and_melding_test(leftistHeap, false, "leftist-heap");
             Tester.insert_and_melding_test(skewHeap, false, "skew-heap");
         }
+
+
+
     }
 }

@@ -112,7 +112,7 @@ public class Tester {
         StringBuilder sb = new StringBuilder(header);
 
         int n = (int) Math.pow(2, MAX_EXP);
-        System.out.println("Creando arreglo tamaño " + n + "...");
+        System.out.println("Creando arreglo de tamaño " + n + "...");
         DataManager dm = new DataManager(n, 0);
 
         System.out.println("Revolviendo arreglo...");
@@ -127,7 +127,7 @@ public class Tester {
             long start, end;
             InsertAndMelding insMel = new InsertAndMelding(i, list);
 
-            System.out.println("Insertando subarreglos de tamaño " + k + " en subcolas...");
+            System.out.println("Creando " + k + " subarreglos de tamaño " + n/k + " en subcolas...");
             start = System.currentTimeMillis();
             insMel.insercion(cp);
             end = System.currentTimeMillis();
