@@ -10,25 +10,25 @@ import java.util.List;
 
 public class InsertAndMelding {
 
-    private List<List<Integer>> nodes_list;
+    private List<Integer> nodes;
     private Box box;
     private BoxFactory factory;
+    private int k;
 
     public InsertAndMelding(int i, List<Integer> nodes) {
-        int k = (int) Math.pow(2, i);
-        nodes_list = new LinkedList<>();
-        for(int j = 0; j < nodes.size(); j += k) {
-            nodes_list.add(new LinkedList<>(nodes.subList(j, j + k)));
-        }
-        factory = new BoxFactory();
+        this.k = (int) Math.pow(2, i);
+        this.nodes = nodes;
+        this.factory = new BoxFactory();
     }
 
     public void insercion(PriorityQueue cp) {
         assert box == null;
         this.box = factory.create(cp);
-        for (List<Integer> subarray: nodes_list) {
+        int n = this.nodes.size();
+        for(int offset = 0; offset < this.nodes.size(); offset += n/k) {
             this.box.new_queue();
-            for (int num: subarray) {
+            for(int j = 0; j < n/k; j += 1) {
+                int num = this.nodes.get(offset + j);
                 this.box.get(box.size() - 1).insertar(num, num);
             }
         }
@@ -36,8 +36,8 @@ public class InsertAndMelding {
 
     public PriorityQueue melding() {
         while(box.size() > 1) {
-            int i = 0;
-            while(i < box.size() / 2) {
+            int i = 0, n = box.size() / 2;
+            while(i < n) {
                 box.meld(i);
                 i++;
             }
