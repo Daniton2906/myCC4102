@@ -1,5 +1,6 @@
 package main;
 
+import edu.princeton.cs.algs4.Graph;
 import utils.DataManager;
 import utils.Tester;
 
