@@ -3,70 +3,118 @@ package utils;
 import com.sun.xml.internal.bind.v2.TODO;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 public class Graph {
-    private static final String NEWLINE = System.getProperty("line.separator");
 
     private int V, E;
+    ArrayList<Integer>[] adjM, adjL;
 
-    private class Pair {
-        private int a, b;
-
-        public Pair(int _a, int _b) {
-            a = _a;
-            b = _b;
-        }
-
-        public int getFirst() {
-            return a;
-        }
-
-        public int getSecond() {
-            return b;
-        }
-
-    }
-
-    ArrayList<Pair>[] adj;
     public Graph(int n) {
         V = n;
+        E = 0;
 
-        adj = new ArrayList[n];
-        for (int i = 0; i < n; i++)
-            adj[i] = new ArrayList();
+        adjL = new ArrayList[n];
+        adjM = new ArrayList[n];
+        for (int i = 0; i < n; i++) {
+            adjL[i] = new ArrayList();
+            adjM[i] = new ArrayList();
+            for(int j=0; j<n; j++) {
+                adjM[i].add(j, 0);
+            }
+        }
     }
-
 
     public Graph(Graph G) {
         V = G.getV();
         E = G.getE();
 
-        adj = new ArrayList[V];
+        adjL = new ArrayList[V];
+        adjM = new ArrayList[V];
         for(int i=0; i<V; i++) {
-            ArrayList<Pair> l_i = G.getNeighboor(i);
+            ArrayList<Integer> l_i = G.getNeighboor(i);
 
-            adj[i] = new ArrayList<>();
-            adj[i].addAll(l_i);
+            adjL[i] = new ArrayList<>();
+            adjM[i] = new ArrayList<>();
+
+            adjL[i].addAll(l_i);
+            adjM[i].addAll(G.adjM[i]);
         }
     }
 
-    public void randomGraph(double probability) {
-        for(int i=0; i<V; i++) {
-            adj[i].clear();
-        }
+    public ArrayList<Integer> getNeighboor(int u) {
+        return adjL[u];
+    }
 
+    // por ahora, suponemos que partimos de un grafo vacio.
+    // los pesos son unitarios.
+    public void randomGraph(double prob) {
         for(int i=0; i<V; i++) {
             for(int j=i+1; j<V; j++) {
                 double p = Math.random();
-                if(p < probability) {
-                    adj[i].add(new Pair(1, j));
+
+                if(p < prob) {
+                    E++;
+                    adjL[i].add(j);
+                    adjL[j].add(i);
+
+                    adjM[i].set(j, 1);
+                    adjM[j].set(i, 1);
+
                 }
             }
         }
     }
 
-    public ArrayList<Pair> getNeighboor(int v) {
-        return adj[v];
+    public boolean isConnected() {
+        boolean res = true;
+        int parent[] = dfs(0);
+        for(int a : parent) {
+            if(a == -1)
+                res = false;
+
+        }
+
+        return res;
+    }
+
+    public int[] dfs(int s) {
+        int parent[] = new int[V];
+        for(int i=0; i<V; i++) {
+            parent[i] = -1;
+        }
+        parent[s] = 0;
+        Stack<Integer> st = new Stack<>();
+        st.push(s);
+        while(!st.empty()) {
+            int u = st.peek(); st.pop();
+
+            for(int v : adjL[u]) {
+                if(parent[v] == -1) {
+                    parent[v] = u;
+                    st.push(v);
+                }
+            }
+        }
+
+        return parent;
+    }
+
+    public void addEdge(int u, int v, int w) {
+        E++;
+        adjL[u].add(v);
+        adjL[v].add(u);
+
+        adjM[u].set(v, w);
+        adjM[v].set(u, w);
+    }
+
+    public void addEdge(int u, int v) {
+        addEdge(u, v, 1);
+    }
+
+    public void setWeight(int u, int v, int w) {
+        adjM[u].set(v, w);
     }
 
     public int getV() {
@@ -77,27 +125,13 @@ public class Graph {
         return E;
     }
 
-    public void addEdge(int u, int v, int w) {
-        E++;
-        adj[u].add(new Pair(w, v));
-        adj[v].add(new Pair(w, u));
-    }
-
-    public void addEdge(int u, int v) {
-        addEdge(u, v, 1);
-    }
-
-    public int degree(int v) {
-        return adj[v].size();
-    }
-
     public String toString() {
         StringBuilder s = new StringBuilder();
-        s.append("nodes " + V + ", edges " + E + "\n");
+        s.append(V + " " + E + "\n");
         for (int v = 0; v < V; v++) {
             s.append(v + ": ");
-            for (Pair p : adj[v]) {
-                s.append(p.getSecond() + "(" + p.getFirst() + ") ");
+            for(int u : adjL[v]) {
+                s.append(u + "(" + adjM[v].get(u) + ") ");
             }
             s.append("\n");
         }
@@ -122,7 +156,18 @@ public class Graph {
 
         System.out.println(G2.toString());
 
-        Graph G3 = new Graph(5);
-        G3.randomGraph(0.5);
+        Graph G3 = new Graph(8);
+        G3.randomGraph(0.2);
+        System.out.println(G3.toString());
+
+        int[] p3 = G3.dfs(0);
+        for(int i=0; i<G3.getV(); i++) {
+            System.out.print(p3[i] + " ");
+        }
+        System.out.print("\n");
+
+        G.setWeight(0, 4, 10);
+        System.out.println(G.toString());
+
     }
 }
