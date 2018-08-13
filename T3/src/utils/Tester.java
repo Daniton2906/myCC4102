@@ -1,8 +1,8 @@
 package utils;
 
-import apps.InsertAndMelding;
-import apps.Sort;
-import priority_queue.PriorityQueue;
+// import apps.InsertAndMelding;
+// import apps.Sort;
+// import priority_queue.PriorityQueue;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -39,7 +39,7 @@ public class Tester {
         }
         return fd;
     }
-
+    /*
     static public void test0(PriorityQueue c, DataManager dm, boolean debug) {
         System.out.println("Original array: " + dm.toString());
         Vector<Integer> vec;
@@ -147,4 +147,5 @@ public class Tester {
         System.out.println(sb.toString());
         writer.close();
     }
+    */
 }

@@ -1,7 +1,5 @@
 package main;
 
-import org.junit.Test;
-import priority_queue.*;
 import utils.DataManager;
 import utils.Tester;
 
@@ -15,7 +13,7 @@ public class Main {
     public static void main (String [ ] args) throws IOException {
         System.out.println("Hello World");
 
-        String results_folder = "/T2/results";
+        String results_folder = "/T3/results";
 
         File dir = new File(new File("").getAbsolutePath() + results_folder);
         System.out.println("Resultados en " + dir);
@@ -25,11 +23,11 @@ public class Main {
         System.out.println("Iniciando testing...");
 
         DataManager dm = new DataManager(N, 0);
-        PriorityQueue heapClasico = new HeapClasico(),
+        /*PriorityQueue heapClasico = new HeapClasico(),
                 colaBinomial = new ColaBinomial(),
                 colaFibonacci = new ColaFibonacci(),
                 leftistHeap = new LeftistHeap(),
-                skewHeap = new SkewHeap();
+                skewHeap = new SkewHeap();*/
         //Tester.test0(heapClasico, dm, false);
         //Tester.test0(colaBinomial, dm, false);
         //Tester.test0(colaFibonacci, dm, false);
@@ -38,6 +36,8 @@ public class Main {
 
         int N_TESTS = 100;
         for (int i = 0; i < N_TESTS; i++) {
+            System.out.println("Holo");
+            /*
             Tester.sort_test(heapClasico, false, "heap-clasico");
             Tester.sort_test(colaBinomial, false, "cola-binomial");
             Tester.sort_test(colaFibonacci, false, "cola-fibonacci");
@@ -49,6 +49,7 @@ public class Main {
             Tester.insert_and_melding_test(colaFibonacci, false, "cola-fibonacci");
             Tester.insert_and_melding_test(leftistHeap, false, "leftist-heap");
             Tester.insert_and_melding_test(skewHeap, false, "skew-heap");
+            */
         }
 
 
