@@ -32,7 +32,7 @@ public class Graph {
         adjL = new ArrayList[V];
         adjM = new ArrayList[V];
         for(int i=0; i<V; i++) {
-            ArrayList<Integer> l_i = G.getNeighboor(i);
+            ArrayList<Integer> l_i = G.getNeighboorAdjL(i);
 
             adjL[i] = new ArrayList<>();
             adjM[i] = new ArrayList<>();
@@ -42,8 +42,12 @@ public class Graph {
         }
     }
 
-    public ArrayList<Integer> getNeighboor(int u) {
+    public ArrayList<Integer> getNeighboorAdjL(int u) {
         return adjL[u];
+    }
+
+    public ArrayList<Integer> getNeighboorAdjM(int u) {
+        return adjM[u];
     }
 
     // por ahora, suponemos que partimos de un grafo vacio.
@@ -63,6 +67,14 @@ public class Graph {
 
                 }
             }
+        }
+    }
+
+    public void randomConnectedGraph(double prob) {
+        while(true) {
+            randomGraph(prob);
+            if(isConnected())
+                break;
         }
     }
 
@@ -113,6 +125,10 @@ public class Graph {
         addEdge(u, v, 1);
     }
 
+    public int getWeight(int u, int v) {
+        return adjM[u].get(v);
+    }
+
     public void setWeight(int u, int v, int w) {
         adjM[u].set(v, w);
     }
@@ -157,13 +173,14 @@ public class Graph {
         System.out.println(G2.toString());
 
         Graph G3 = new Graph(8);
-        G3.randomGraph(0.2);
+        G3.randomGraph(0.1);
         System.out.println(G3.toString());
 
         int[] p3 = G3.dfs(0);
         for(int i=0; i<G3.getV(); i++) {
             System.out.print(p3[i] + " ");
         }
+        System.out.println("\nis connected? : " + G3.isConnected());
         System.out.print("\n");
 
         G.setWeight(0, 4, 10);
