@@ -1,5 +1,6 @@
 package main;
 
+import edu.princeton.cs.algs4.EdgeWeightedGraph;
 import utils.DataManager;
 import utils.Tester;
 
@@ -22,7 +23,7 @@ public class Main {
             System.exit(0);
         System.out.println("Iniciando testing...");
 
-        DataManager dm = new DataManager(N, 0);
+        EdgeWeightedGraph graph = DataManager.getRandomGraph(N, 0.5);
         /*PriorityQueue heapClasico = new HeapClasico(),
                 colaBinomial = new ColaBinomial(),
                 colaFibonacci = new ColaFibonacci(),

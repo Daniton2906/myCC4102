@@ -4,6 +4,9 @@ package utils;
 // import apps.Sort;
 // import priority_queue.PriorityQueue;
 
+import edu.princeton.cs.algs4.EdgeWeightedGraph;
+import min_cut.MinCutApp;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -39,6 +42,11 @@ public class Tester {
         }
         return fd;
     }
+
+    static public void test0(MinCutApp app, EdgeWeightedGraph graph) {
+
+    }
+
     /*
     static public void test0(PriorityQueue c, DataManager dm, boolean debug) {
         System.out.println("Original array: " + dm.toString());
