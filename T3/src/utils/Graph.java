@@ -8,6 +8,7 @@ import java.util.Stack;
 public class Graph {
 
     private int V, E;
+    // Matriz y lista de adyacencia.
     ArrayList<Integer>[] adjM, adjL;
 
     public Graph(int n) {
@@ -57,7 +58,7 @@ public class Graph {
             for(int j=i+1; j<V; j++) {
                 double p = Math.random();
 
-                if(p < prob) {
+                if(p < prob && adjM[i].get(j) == 0) {
                     E++;
                     adjL[i].add(j);
                     adjL[j].add(i);
@@ -73,8 +74,20 @@ public class Graph {
     public void randomConnectedGraph(double prob) {
         while(true) {
             randomGraph(prob);
-            if(isConnected())
+            if(isConnected()) {
+                System.out.println("random connected graph end");
                 break;
+            }
+            /*
+            for(int i=0; i<getV(); i++) {
+                adjL[i].clear();
+                adjM[i].clear();
+                for(int j=0; j<getV(); j++) {
+                    adjM[i].add(j, 0);
+                }
+            }
+            */
+            System.out.println("no random connected graph");
         }
     }
 
@@ -144,10 +157,19 @@ public class Graph {
     public String toString() {
         StringBuilder s = new StringBuilder();
         s.append(V + " " + E + "\n");
+        s.append("adjL\n");
         for (int v = 0; v < V; v++) {
             s.append(v + ": ");
             for(int u : adjL[v]) {
                 s.append(u + "(" + adjM[v].get(u) + ") ");
+            }
+            s.append("\n");
+        }
+
+        s.append("\nadjM\n");
+        for(int v = 0; v < V; v++) {
+            for(int u : adjM[v]) {
+                s.append(u + " ");
             }
             s.append("\n");
         }
@@ -183,8 +205,8 @@ public class Graph {
         System.out.println("\nis connected? : " + G3.isConnected());
         System.out.print("\n");
 
-        G.setWeight(0, 4, 10);
-        System.out.println(G.toString());
+        Graph G4 = new Graph(100);
+        G4.randomConnectedGraph(1.0/100.0);
 
     }
 }
