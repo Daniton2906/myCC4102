@@ -103,11 +103,11 @@ public class DeterministicAlgorithm implements MinCutApp {
         return flow_count;
     }
 
-    public void minCut() {
+    public void minCut(int[] vertex) {
         int s = 0;
         int best_mf = 1000000000;
         ArrayList<Pair> best_mc = new ArrayList<>();
-        for(int i=1; i<G.getV(); i++) {
+        for(int i : vertex) {
             int mf = maxFlow(s, i);
 
             int parent[] = dfs_aumentante(s, i);
@@ -131,6 +131,14 @@ public class DeterministicAlgorithm implements MinCutApp {
         bestMinCut.clear();
         bestMinCut.addAll(best_mc);
         bestMaxFlow = best_mf;
+    }
+
+    public void minCut() {
+        int vertex[] = new int[G.getV()];
+        for(int i=0; i<G.getV(); i++) {
+            vertex[i] = i;
+        }
+        minCut(vertex);
     }
 
     public static void main(String[] args) {

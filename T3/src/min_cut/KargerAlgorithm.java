@@ -11,38 +11,135 @@ import java.util.concurrent.ThreadLocalRandom;
 // Usamos algoritmo de Ford Fulkerson
 public class KargerAlgorithm implements MinCutApp {
 
+    private class UnionFind {
+        int r[], p[];
+
+        public UnionFind(int n) {
+            r = new int[n+1];
+            p = new int[n+1];
+            for(int i=0; i<n+1; i++) {
+                r[i] = i;
+                p[i] = i;
+            }
+        }
+
+        int findSet(int x) {
+            return (p[x] == x) ? x : (p[x] = findSet(p[x]));
+        }
+
+        boolean sameSet(int x, int y) {
+            return (findSet(x) == findSet(y));
+        }
+
+        void unionSet(int x, int y) {
+            if(sameSet(x, y)) return;
+
+            x = findSet(x); y = findSet(y);
+            if(r[x] > r[y]) {
+                p[x] = y;
+                r[y]++;
+            } else {
+                p[y] = x;
+                r[x]++;
+            }
+        }
+    }
+
     Graph G, resG;
-    int V, E;
-    int asignacion[], renombre[];
-    ArrayList<Pair> bestMinCut = new ArrayList<>();
+    UnionFind uf;
+    ArrayList<Pair> bestMinCut = new ArrayList<>(), edgeList = new ArrayList<>();
 
     public KargerAlgorithm(Graph _G) {
         G = new Graph(_G);
         resG = new Graph(_G);
-        V = G.getV(); E = G.getE();
+        uf = new UnionFind(G.getV());
 
-        asignacion = new int[G.getV()];
-        renombre = new int[G.getV()];
-        for(int i=0; i<G.getV(); i++) asignacion[i] = i;
+        for(int i=0; i<G.getV(); i++) {
+            for(int x : G.getNeighboorAdjL(i)) {
+                edgeList.add(new Pair(i, x));
+            }
+        }
     }
 
     private void collapseEdge() {
+        while(true) {
+            int r = ThreadLocalRandom.current().nextInt(0, edgeList.size());
+            Pair p = edgeList.get(r);
 
+            int u = p.getFirst(), v = p.getSecond();
+            System.out.println("par: " + u + " " + v);
 
+            System.out.println("asignacion u: " + uf.findSet(u));
+            System.out.println("asignacion v: " + uf.findSet(v));
 
+            if(uf.findSet(u) == uf.findSet(v)) {
+                System.out.println("misma asignacion, repitiendo...");
+                edgeList.remove(r);
+                continue;
+            }
+            edgeList.remove(r);
+            System.out.println("distinta asignacion, colapsando vertice...");
 
+            uf.unionSet(u, v);
+            break;
+
+        }
     }
 
-    public void minCut(int num_colapse) {
-        num_colapse = Math.min(num_colapse, V - 2);
-        for(int i=0; i<num_colapse; i++)
+    public void minCut(int num_vertex) {
+        int n = G.getV();
+        num_vertex = Math.max(Math.min(num_vertex, n), 2);
+
+        while(n > num_vertex) {
+            System.out.println("vertices actuales: " + n);
             collapseEdge();
+            n--;
+        }
 
+        System.out.println("asignacion final:");
+        for(int i=0; i<G.getV(); i++) {
+            System.out.println(i + ": " + uf.findSet(i));
+        }
 
+        for(Pair p : edgeList) {
+            int u = p.getFirst(), v = p.getSecond();
+            if(uf.findSet(u) != uf.findSet(v)) {
+                Pair P = new Pair(Math.min(u, v), Math.max(u, v));
 
+                int ver = 0;
+                for(Pair q : bestMinCut) {
+                    if(q.getFirst() == P.getFirst() && q.getSecond() == P.getSecond())
+                        ver = 1;
+
+                }
+
+                if(ver == 1)
+                    continue;
+
+                bestMinCut.add(P);
+            }
+        }
+
+        G = new Graph(resG);
+        uf = new UnionFind(G.getV());
     }
 
     public static void main(String[] args) {
+        Graph G1 = new Graph(8);
+        G1.randomConnectedGraph(0.5);
+        System.out.println("grafo inicial:");
+        System.out.print(G1.toString());
 
+        KargerAlgorithm kg = new KargerAlgorithm(G1);
+        kg.minCut(2);
+
+        //System.out.println("grafo final:");
+        //System.out.print(G1.toString());
+
+        System.out.println("minCut: ");
+        for(Pair p : kg.bestMinCut) {
+            System.out.print("(" + p.getFirst() + "," + p.getSecond() + ") ");
+        }
+        System.out.print("\n");
     }
 }
