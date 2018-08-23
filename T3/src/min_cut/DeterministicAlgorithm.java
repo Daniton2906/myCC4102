@@ -142,7 +142,7 @@ public class DeterministicAlgorithm implements MinCutApp {
         DeterministicAlgorithm dt = new DeterministicAlgorithm(G1);
         int parents[] = dt.dfs_aumentante(0, 5);
 
-        System.out.println("parent\n");
+        System.out.println("parent");
         for(int i=0; i<G1.getV(); i++) {
             System.out.print(parents[i] + " ");
         }
