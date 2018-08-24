@@ -4,15 +4,8 @@ package utils;
 // import apps.Sort;
 // import priority_queue.PriorityQueue;
 
-import edu.princeton.cs.algs4.EdgeWeightedGraph;
-import min_cut.MinCutApp;
-
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
-import java.util.Vector;
 
 public class Tester {
 
@@ -43,7 +36,7 @@ public class Tester {
         return fd;
     }
 
-    static public void test0(MinCutApp app, EdgeWeightedGraph graph) {
+    static public void test0(Graph graph) {
 
     }
 

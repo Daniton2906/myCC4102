@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 // Usamos algoritmo de Ford Fulkerson
-public class DeterministicAlgorithm implements MinCutApp {
+public class DeterministicAlgorithm {
 
     Graph G, resG;
     ArrayList<Pair> bestMinCut = new ArrayList<>();

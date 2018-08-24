@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class MixedAlgorithm implements MinCutApp {
+public class MixedAlgorithm {
 
     class PairSort implements Comparator<Pair>
     {

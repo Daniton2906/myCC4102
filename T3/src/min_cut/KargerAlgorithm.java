@@ -6,7 +6,7 @@ import utils.Pair;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class KargerAlgorithm implements MinCutApp {
+public class KargerAlgorithm {
 
     private class UnionFind {
         int r[], p[];
