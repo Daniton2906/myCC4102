@@ -14,19 +14,12 @@ public class DeterministicAlgorithm implements MinCutApp {
     Graph G, resG;
     ArrayList<Pair> bestMinCut = new ArrayList<>();
     int bestMaxFlow = 0;
-    int vertex_assign[];
+    ArrayList<Integer> vertex_assign[] ;
 
     public DeterministicAlgorithm(Graph _G) {
         G = new Graph(_G);
         resG = new Graph(_G);
 
-        vertex_assign = new int[G.getV()];
-        for(int i=0; i<G.getV(); i++)
-            vertex_assign[i] = i;
-    }
-
-    public void vertexAssign(int[] assign) {
-        vertex_assign = assign;
     }
 
     private int[] dfs_aumentante(int s, int t) {
@@ -73,14 +66,17 @@ public class DeterministicAlgorithm implements MinCutApp {
                    Tal vez cambiar el algoritmo a Dinic.
      */
     public void maxFlow(int s, int t) {
+        System.out.println("max flow " + s + " -> " + t);
         while(true) {
             // Determinar la existencia de un camino aumentante.
             int parent[] = dfs_aumentante(s, t);
 
+            /*
             for(int i : parent) {
                 System.out.print(i + " ");
             }
             System.out.println("");
+            */
 
             if(parent[t] == -1)
                 break;
@@ -88,10 +84,6 @@ public class DeterministicAlgorithm implements MinCutApp {
             int fin = t;
             int min_cap = 1000000000;
 
-            // Puesto que todas las aristas tienen el mismo peso, si existe un camino aumentante,
-            // entonces es de costo 1.
-
-            // Obtencion de cual es el vertice de menor peso
             while(fin != parent[fin]) {
                 int ini = parent[fin];
 
@@ -104,7 +96,7 @@ public class DeterministicAlgorithm implements MinCutApp {
 
             }
             if(min_cap == 0) {
-                System.out.println("mincap");
+                //System.out.println("mincap");
                 break;
             }
 
@@ -124,16 +116,16 @@ public class DeterministicAlgorithm implements MinCutApp {
     }
 
     public void minCut() {
-        int s = vertex_assign[0];
+        int s = 0;
         int best_mf = 1000000000;
         ArrayList<Pair> best_mc = new ArrayList<>();
 
         int reg[] = new int[G.getV()];
         for(int i=0; i<G.getV(); i++)
             reg[i] = 0;
-        reg[0] = 1;
+        reg[s] = 1;
 
-        for(int i : vertex_assign) {
+        for(int i=0; i<G.getV(); i++) {
             if(reg[i] == 1)
                 continue;
 
@@ -201,8 +193,8 @@ public class DeterministicAlgorithm implements MinCutApp {
         Graph G = new Graph(3);
         G.addEdge(0, 1);
         G.addEdge(0, 1);
-        //G.addEdge(1, 2);
-        //G.addEdge(1, 2);
+        G.addEdge(1, 2);
+        G.addEdge(1, 2);
         G.addEdge(1, 2);
         System.out.print(G.toString() + "\n");
 

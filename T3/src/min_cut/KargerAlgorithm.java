@@ -54,6 +54,7 @@ public class KargerAlgorithm implements MinCutApp {
     UnionFind uf;
     int asignacion[];
     ArrayList<Pair> bestMinCut = new ArrayList<>(), edgeList = new ArrayList<>();
+    int cant_edge;
 
     public KargerAlgorithm(Graph _G) {
         G = new Graph(_G);
@@ -69,11 +70,14 @@ public class KargerAlgorithm implements MinCutApp {
                 edgeList.add(new Pair(i, x));
             }
         }
+        cant_edge = edgeList.size();
     }
+
+
 
     private void collapseEdge() {
         while(true) {
-            int r = ThreadLocalRandom.current().nextInt(0, edgeList.size());
+            int r = ThreadLocalRandom.current().nextInt(0, cant_edge);
             Pair p = edgeList.get(r);
 
             int u = p.getFirst(), v = p.getSecond();
@@ -84,10 +88,19 @@ public class KargerAlgorithm implements MinCutApp {
 
             if(uf.findSet(u) == uf.findSet(v)) {
                 System.out.println("misma asignacion, repitiendo...");
-                edgeList.remove(r);
+
+                Pair aux = edgeList.get(r);
+                edgeList.set(r, edgeList.get(cant_edge - 1));
+                edgeList.set(cant_edge - 1, aux);
+
+                cant_edge--;
                 continue;
             }
-            edgeList.remove(r);
+            Pair aux = edgeList.get(r);
+            edgeList.set(r, edgeList.get(cant_edge - 1));
+            edgeList.set(cant_edge - 1, aux);
+
+            cant_edge--;
             System.out.println("distinta asignacion, colapsando vertice...");
 
             uf.unionSet(u, v);
@@ -106,11 +119,13 @@ public class KargerAlgorithm implements MinCutApp {
             n--;
         }
 
+        /*
         System.out.println("asignacion final:");
         for(int i=0; i<G.getV(); i++) {
             asignacion[i] = uf.findSet(i);
             System.out.println(i + ": " + uf.findSet(i));
         }
+        */
 
         for(Pair p : edgeList) {
             int u = p.getFirst(), v = p.getSecond();
@@ -144,8 +159,8 @@ public class KargerAlgorithm implements MinCutApp {
     }
 
     public static void main(String[] args) {
-        Graph G1 = new Graph(8);
-        G1.randomConnectedGraph(0.2);
+        Graph G1 = new Graph(12);
+        G1.randomConnectedGraph(1.0/12.0);
         System.out.println("grafo inicial:");
         System.out.print(G1.toString());
 
