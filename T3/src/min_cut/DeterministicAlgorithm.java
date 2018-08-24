@@ -3,6 +3,7 @@ package min_cut;
 import utils.Graph;
 import utils.Pair;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Stack;
 
@@ -28,11 +29,11 @@ public class DeterministicAlgorithm {
             //visited[i] = 0;
         }
 
-        Stack<Integer> st = new Stack<>(); st.push(s);
+        ArrayDeque<Integer> st = new ArrayDeque<>(); st.push(s);
         parent[s] = s;
 
-        while(!st.empty()) {
-            int u = st.peek(); st.pop();
+        while(!st.isEmpty()) {
+            int u = st.getFirst(); st.removeFirst();
 
             /*
             if(visited[u] == 0) {
@@ -48,7 +49,7 @@ public class DeterministicAlgorithm {
             for(int v : G.getNeighboorAdjL(u)) {
                 if(parent[v] == -1 && G.getWeight(u, v) > 0) {
                     parent[v] = u;
-                    st.push(v);
+                    st.add(v);
                 }
             }
         }
