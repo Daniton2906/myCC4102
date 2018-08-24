@@ -79,10 +79,12 @@ public class MixedAlgorithm implements MinCutApp {
         comp = new PairSort(new_asign);
         Collections.sort(kgmincut, comp);
 
+        /*
         System.out.println("mincut edge");
         for(Pair p : kgmincut) {
             System.out.println(p.getFirst() + " " + p.getSecond() + " . " + new_asign[p.getFirst()] + " " + new_asign[p.getSecond()]);
         }
+        */
 
         Graph auxG = new Graph(num_vertex_left);
         for(Pair p : kgmincut) {
@@ -123,15 +125,68 @@ public class MixedAlgorithm implements MinCutApp {
         }
     }
 
+    public void kMinCut(int k, int t) {
+        int s = -1;
+        ArrayList<Pair> lastBest = new ArrayList<>();
+
+        for(int i=0; i<k; i++) {
+            System.out.println("\nITERACION " + (i+1) + "\n###############");
+            minCut(t);
+
+            if(bestMinCut.size() < s || s == -1) {
+                s = bestMinCut.size();
+                lastBest = new ArrayList<>(bestMinCut);
+
+            }
+            bestMinCut.clear();
+
+        }
+        bestMinCut = new ArrayList<>(lastBest);
+    }
+
     public static void main(String args[]) {
-        Graph G = new Graph(7);
-        G.randomConnectedGraph(0.6);
+        Graph G = new Graph(11);
+        G.randomConnectedGraph(0.5);
 
         System.out.println("Descripcion del grafo");
         System.out.println(G.toString());
 
         MixedAlgorithm mx = new MixedAlgorithm(G);
-        mx.minCut(4);
+        mx.kMinCut(6, 5);
+
+        System.out.println("mx best min-cut");
+        for(Pair p : mx.bestMinCut) {
+            System.out.println(p.getFirst() + " " + p.getSecond());
+        }
+
+
+        G = new Graph(8);
+        G.addEdge(0, 1);
+        G.addEdge(0, 5);
+        G.addEdge(0, 6);
+
+        G.addEdge(1, 2);
+        G.addEdge(1, 5);
+        G.addEdge(1, 6);
+
+        G.addEdge(2, 3);
+        G.addEdge(2, 4);
+        G.addEdge(2, 7);
+
+        G.addEdge(3, 4);
+        G.addEdge(3, 7);
+
+        G.addEdge(4, 7);
+
+        G.addEdge(5, 6);
+
+        G.addEdge(6, 7);
+
+        System.out.println("Descripcion del grafo");
+        System.out.println(G.toString());
+
+        mx = new MixedAlgorithm(G);
+        mx.kMinCut(6, 5);
 
         System.out.println("mx best min-cut");
         for(Pair p : mx.bestMinCut) {

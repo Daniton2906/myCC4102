@@ -154,7 +154,7 @@ public class Graph {
     public String toString() {
         StringBuilder s = new StringBuilder();
         s.append(V + " " + E + "\n");
-        s.append("adjL\n");
+        s.append("Lista de adyacencia\n");
         for (int v = 0; v < V; v++) {
             s.append(v + ": ");
             for(int u : adjL[v]) {
@@ -162,7 +162,7 @@ public class Graph {
             }
             s.append("\n");
         }
-
+        /*
         s.append("\nadjM\n");
         for(int v = 0; v < V; v++) {
             for(int u : adjM[v]) {
@@ -170,6 +170,7 @@ public class Graph {
             }
             s.append("\n");
         }
+        */
         return s.toString();
     }
 

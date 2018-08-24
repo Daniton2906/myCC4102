@@ -56,7 +56,7 @@ public class DeterministicAlgorithm implements MinCutApp {
     }
 
     public void maxFlow(int s, int t) {
-        System.out.println("max flow " + s + " -> " + t);
+        //System.out.println("max flow " + s + " -> " + t);
         while(true) {
             // Determinar la existencia de un camino aumentante.
             int parent[] = dfs_aumentante(s, t);

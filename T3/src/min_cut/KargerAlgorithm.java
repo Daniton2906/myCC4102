@@ -3,12 +3,9 @@ package min_cut;
 import utils.Graph;
 import utils.Pair;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
 
-// Usamos algoritmo de Ford Fulkerson
 public class KargerAlgorithm implements MinCutApp {
 
     private class UnionFind {
@@ -47,7 +44,6 @@ public class KargerAlgorithm implements MinCutApp {
         public int[] getSet() {
             return p;
         }
-
     }
 
     Graph G, resG;
@@ -81,13 +77,13 @@ public class KargerAlgorithm implements MinCutApp {
             Pair p = edgeList.get(r);
 
             int u = p.getFirst(), v = p.getSecond();
-            System.out.println("par: " + u + " " + v);
+            //System.out.println("par: " + u + " " + v);
 
-            System.out.println("asignacion u: " + uf.findSet(u));
-            System.out.println("asignacion v: " + uf.findSet(v));
+            //System.out.println("asignacion u: " + uf.findSet(u));
+            //System.out.println("asignacion v: " + uf.findSet(v));
 
             if(uf.findSet(u) == uf.findSet(v)) {
-                System.out.println("misma asignacion, repitiendo...");
+                //System.out.println("misma asignacion, repitiendo...");
 
                 Pair aux = edgeList.get(r);
                 edgeList.set(r, edgeList.get(cant_edge - 1));
@@ -101,7 +97,7 @@ public class KargerAlgorithm implements MinCutApp {
             edgeList.set(cant_edge - 1, aux);
 
             cant_edge--;
-            System.out.println("distinta asignacion, colapsando vertice...");
+            //System.out.println("distinta asignacion, colapsando vertice...");
 
             uf.unionSet(u, v);
             break;
@@ -114,7 +110,7 @@ public class KargerAlgorithm implements MinCutApp {
         num_vertex = Math.max(Math.min(num_vertex, n), 2);
 
         while(n > num_vertex) {
-            System.out.println("vertices actuales: " + n);
+            //System.out.println("vertices actuales: " + n);
             collapseEdge();
             n--;
         }
@@ -156,6 +152,24 @@ public class KargerAlgorithm implements MinCutApp {
     void reset() {
         G = new Graph(resG);
         uf = new UnionFind(G.getV());
+        asignacion = new int[G.getV()];
+        cant_edge = edgeList.size();
+        bestMinCut.clear();
+    }
+
+    void kMinCut(int k) {
+        int s = -1;
+        ArrayList<Pair> lastBest = new ArrayList<>();
+        for(int i=0; i<k; i++) {
+            System.out.println("\nITERACION " + (i+1) + "\n###############");
+            minCut(2);
+            if(bestMinCut.size() < s || s == -1) {
+                s = bestMinCut.size();
+                lastBest = new ArrayList<>(bestMinCut);
+            }
+            reset();
+        }
+        bestMinCut = new ArrayList<>(lastBest);
     }
 
     public static void main(String[] args) {
@@ -165,7 +179,7 @@ public class KargerAlgorithm implements MinCutApp {
         System.out.print(G1.toString());
 
         KargerAlgorithm kg = new KargerAlgorithm(G1);
-        kg.minCut(2);
+        kg.kMinCut(5);
 
         //System.out.println("grafo final:");
         //System.out.print(G1.toString());
