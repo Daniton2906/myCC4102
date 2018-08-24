@@ -12,6 +12,7 @@ public class DeterministicAlgorithm {
     Graph G, resG;
     ArrayList<Pair> bestMinCut = new ArrayList<>();
     int bestMaxFlow = 0;
+    double time_max_flow = 0.0;
 
     public DeterministicAlgorithm(Graph _G) {
         G = new Graph(_G);
@@ -111,7 +112,11 @@ public class DeterministicAlgorithm {
                 continue;
 
             reg[i] = 1;
+            double start = System.currentTimeMillis();
             maxFlow(s, i);
+            double end = System.currentTimeMillis();
+
+            time_max_flow += (end - start);
 
             int parent[] = dfs_aumentante(s, i);
             ArrayList<Pair> lastMinCut = new ArrayList<>();
@@ -133,6 +138,8 @@ public class DeterministicAlgorithm {
 
             G = new Graph(resG);
         }
+        time_max_flow = time_max_flow / (G.getV()*1.0);
+
         bestMinCut.clear();
         bestMinCut.addAll(best_mc);
         bestMaxFlow = best_mf;
