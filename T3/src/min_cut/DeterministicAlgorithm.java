@@ -3,9 +3,7 @@ package min_cut;
 import utils.Graph;
 import utils.Pair;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Set;
 import java.util.Stack;
 
 // Usamos algoritmo de Ford Fulkerson
@@ -14,7 +12,6 @@ public class DeterministicAlgorithm implements MinCutApp {
     Graph G, resG;
     ArrayList<Pair> bestMinCut = new ArrayList<>();
     int bestMaxFlow = 0;
-    ArrayList<Integer> vertex_assign[] ;
 
     public DeterministicAlgorithm(Graph _G) {
         G = new Graph(_G);
@@ -24,8 +21,7 @@ public class DeterministicAlgorithm implements MinCutApp {
 
     private int[] dfs_aumentante(int s, int t) {
         int parent[] = new int[G.getV()];
-        //int visited[] = new int[G.getV()];
-        //int T = t;
+
         for(int i=0; i<G.getV(); i++) {
             parent[i] = -1;
             //visited[i] = 0;
@@ -33,7 +29,6 @@ public class DeterministicAlgorithm implements MinCutApp {
 
         Stack<Integer> st = new Stack<>(); st.push(s);
         parent[s] = s;
-        //visited[s] = 0;
 
         while(!st.empty()) {
             int u = st.peek(); st.pop();
@@ -60,23 +55,11 @@ public class DeterministicAlgorithm implements MinCutApp {
         return parent;
     }
 
-    /*
-        Pendiente: Cambiar los grafos para que mantengan los peso, y cambiar dfs para realizar actualizaciones
-                    mientras recorre el grafo.
-                   Tal vez cambiar el algoritmo a Dinic.
-     */
     public void maxFlow(int s, int t) {
         System.out.println("max flow " + s + " -> " + t);
         while(true) {
             // Determinar la existencia de un camino aumentante.
             int parent[] = dfs_aumentante(s, t);
-
-            /*
-            for(int i : parent) {
-                System.out.print(i + " ");
-            }
-            System.out.println("");
-            */
 
             if(parent[t] == -1)
                 break;
@@ -95,10 +78,8 @@ public class DeterministicAlgorithm implements MinCutApp {
                 fin = ini;
 
             }
-            if(min_cap == 0) {
-                //System.out.println("mincap");
+            if(min_cap == 0)
                 break;
-            }
 
             // Actualizamos el grafo.
             fin = t;
@@ -130,7 +111,6 @@ public class DeterministicAlgorithm implements MinCutApp {
                 continue;
 
             reg[i] = 1;
-            //System.out.println("minCut: " + s + " -> " + i);
             maxFlow(s, i);
 
             int parent[] = dfs_aumentante(s, i);
@@ -162,24 +142,10 @@ public class DeterministicAlgorithm implements MinCutApp {
 
         Graph G1 = new Graph(8);
         G1.randomConnectedGraph(0.5);
-        //System.out.println("grafo inicial:");
-        //System.out.print(G1.toString());
 
         DeterministicAlgorithm dt = new DeterministicAlgorithm(G1);
-        int parents[] = dt.dfs_aumentante(0, 5);
-
-        /*
-        System.out.println("parent");
-        for(int i=0; i<G1.getV(); i++) {
-            System.out.print(parents[i] + " ");
-        }
-        System.out.print("\n\n");
-        */
 
         dt.minCut();
-
-        //System.out.println("grafo final:");
-        //System.out.print(G1.toString());
 
         System.out.println("mf: " + dt.bestMaxFlow);
         System.out.println("minCut: ");
@@ -187,8 +153,6 @@ public class DeterministicAlgorithm implements MinCutApp {
             System.out.print("(" + p.getFirst() + "," + p.getSecond() + ") ");
         }
         System.out.print("\n");
-
-
 
         Graph G = new Graph(3);
         G.addEdge(0, 1);
