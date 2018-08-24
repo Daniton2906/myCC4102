@@ -14,6 +14,6 @@ public class MixedAlgorithm implements MinCutApp {
 
     }
 
-    
+
 
 }

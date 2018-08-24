@@ -59,13 +59,7 @@ public class Graph {
                 double p = Math.random();
 
                 if(p < prob && adjM[i].get(j) == 0) {
-                    E++;
-                    adjL[i].add(j);
-                    adjL[j].add(i);
-
-                    adjM[i].set(j, 1);
-                    adjM[j].set(i, 1);
-
+                    addEdge(i, j);
                 }
             }
         }
@@ -132,8 +126,9 @@ public class Graph {
         adjL[u].add(v);
         adjL[v].add(u);
 
-        adjM[u].set(v, w);
-        adjM[v].set(u, w);
+        adjM[u].set(v, 1 + adjM[u].get(v));
+        adjM[v].set(u, 1 + adjM[v].get(u));
+
     }
 
     public void addEdge(int u, int v) {

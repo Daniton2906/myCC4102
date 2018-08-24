@@ -43,19 +43,29 @@ public class KargerAlgorithm implements MinCutApp {
                 r[x]++;
             }
         }
+
+        public int[] getSet() {
+            return p;
+        }
+
     }
 
     Graph G, resG;
     UnionFind uf;
+    int asignacion[];
     ArrayList<Pair> bestMinCut = new ArrayList<>(), edgeList = new ArrayList<>();
 
     public KargerAlgorithm(Graph _G) {
         G = new Graph(_G);
         resG = new Graph(_G);
         uf = new UnionFind(G.getV());
+        asignacion = new int[G.getV()];
 
         for(int i=0; i<G.getV(); i++) {
             for(int x : G.getNeighboorAdjL(i)) {
+                if(i > x)
+                    continue;
+
                 edgeList.add(new Pair(i, x));
             }
         }
@@ -98,6 +108,7 @@ public class KargerAlgorithm implements MinCutApp {
 
         System.out.println("asignacion final:");
         for(int i=0; i<G.getV(); i++) {
+            asignacion[i] = uf.findSet(i);
             System.out.println(i + ": " + uf.findSet(i));
         }
 
@@ -106,6 +117,7 @@ public class KargerAlgorithm implements MinCutApp {
             if(uf.findSet(u) != uf.findSet(v)) {
                 Pair P = new Pair(Math.min(u, v), Math.max(u, v));
 
+                /*
                 int ver = 0;
                 for(Pair q : bestMinCut) {
                     if(q.getFirst() == P.getFirst() && q.getSecond() == P.getSecond())
@@ -115,18 +127,25 @@ public class KargerAlgorithm implements MinCutApp {
 
                 if(ver == 1)
                     continue;
+                */
 
                 bestMinCut.add(P);
             }
         }
+    }
 
+    int[] getSet() {
+        return uf.getSet();
+    }
+
+    void reset() {
         G = new Graph(resG);
         uf = new UnionFind(G.getV());
     }
 
     public static void main(String[] args) {
         Graph G1 = new Graph(8);
-        G1.randomConnectedGraph(0.5);
+        G1.randomConnectedGraph(0.2);
         System.out.println("grafo inicial:");
         System.out.print(G1.toString());
 
