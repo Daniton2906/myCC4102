@@ -102,11 +102,6 @@ public class MixedAlgorithm implements MinCutApp {
         comp = new PairSort(cont);
         Collections.sort(dtmincut, comp);
 
-        System.out.println("dt mincut");
-        for(Pair p : dt.bestMinCut) {
-            System.out.println(p.getFirst() + " " + p.getSecond());
-        }
-
         int j = 0;
         for(int i=0; i<kgmincut.size(); i++) {
             if(j >= dtmincut.size())
