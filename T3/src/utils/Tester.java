@@ -125,8 +125,8 @@ public class Tester {
         start = System.currentTimeMillis();
         deterministicMinCut.minCut();
         end = System.currentTimeMillis();
+        System.out.printf("max flow = %f / tiempo corte =%d...\n", deterministicMinCut.time_max_flow, end - start);
         sb.append(deterministicMinCut.time_max_flow).append("\t").append(end - start).append(System.lineSeparator());
-        System.out.printf("tiempo corte =%d...\n", end - start);
         writeMinCut(deterministicMinCut.bestMinCut, name + "-deterministic");
 
         // Karger
@@ -140,15 +140,14 @@ public class Tester {
         start = System.currentTimeMillis();
         kargerMinCut.kMinCut(k);
         end = System.currentTimeMillis();
-        sb.append(end - start).append(System.lineSeparator());
         System.out.printf("tiempo corte =%d...\n", end - start);
+        sb.append(end - start).append(System.lineSeparator());
         writeMinCut(deterministicMinCut.bestMinCut, name + "-karger");
 
         // Mixed
         int delta_t = graph.getV()/10, t = graph.getV() - 1;
         int[] t_list = {t, t - 2*delta_t, t - 3*delta_t, t - 4*delta_t, t - 5*delta_t};
         for(int myt: t_list) {
-            sb.append(myt).append("\t");
             // graph3 = new Graph(graph);
             System.out.printf("Probando mezcla con t=%d...\n", myt);
             start = System.currentTimeMillis();
@@ -160,8 +159,8 @@ public class Tester {
             start = System.currentTimeMillis();
             mixedMinCut.kMinCut(k, t);
             end = System.currentTimeMillis();
+            System.out.printf("tiempo corte =%d con t=%d...\n", end - start, myt);
             sb.append(end - start).append("\t").append(myt).append(System.lineSeparator());
-            System.out.printf("tiempo corte =%d...\n", end - start);
             writeMinCut(deterministicMinCut.bestMinCut, name + "-mixed-" + Integer.toString(myt));
         }
 
@@ -197,7 +196,7 @@ public class Tester {
         for(int j = MIN_EXP; j <= MAX_EXP; j++)
         {
             int n = (int) Math.pow(2, j);
-            testP(n, 10);
+            testP(n, 5);
         }
     }
 
