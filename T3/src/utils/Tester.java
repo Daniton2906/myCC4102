@@ -130,7 +130,7 @@ public class Tester {
         writeMinCut(deterministicMinCut.bestMinCut, name + "-deterministic");
 
         // Karger
-        System.out.println("Probando karger con...");
+        System.out.println("Probando karger...");
         start = System.currentTimeMillis();
         KargerAlgorithm kargerMinCut = new KargerAlgorithm(graph);
         end = System.currentTimeMillis();
@@ -145,8 +145,8 @@ public class Tester {
         writeMinCut(deterministicMinCut.bestMinCut, name + "-karger");
 
         // Mixed
-        int delta_t = graph.getV()/10, t = graph.getV() - 1;
-        int[] t_list = {t, t - 2*delta_t, t - 3*delta_t, t - 4*delta_t, t - 5*delta_t};
+        int delta_t = graph.getV()/10, t = 3;
+        int[] t_list = {t, t + 2*delta_t, t + 3*delta_t, t + 4*delta_t, t + 5*delta_t};
         for(int myt: t_list) {
             // graph3 = new Graph(graph);
             System.out.printf("Probando mezcla con t=%d...\n", myt);
