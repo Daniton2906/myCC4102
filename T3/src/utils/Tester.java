@@ -113,35 +113,55 @@ public class Tester {
         StringBuilder sb = new StringBuilder();
 
         long start, end;
-        DeterministicAlgorithm deterministicMinCut = new DeterministicAlgorithm(graph1);
+
+        //Deterministic
         System.out.println("Probando determinista...");
+        start = System.currentTimeMillis();
+        DeterministicAlgorithm deterministicMinCut = new DeterministicAlgorithm(graph);
+        end = System.currentTimeMillis();
+        System.out.printf("tiempo creacion=%d...\n", end - start);
+        sb.append(end - start).append("\t");
+
         start = System.currentTimeMillis();
         deterministicMinCut.minCut();
         end = System.currentTimeMillis();
         sb.append(deterministicMinCut.time_max_flow).append("\t").append(end - start).append(System.lineSeparator());
-        System.out.printf("tiempo=%d...\n", (end - start)/1000);
+        System.out.printf("tiempo corte =%d...\n", end - start);
         writeMinCut(deterministicMinCut.bestMinCut, name + "-deterministic");
 
-        KargerAlgorithm kargerMinCut = new KargerAlgorithm(graph2);
+        // Karger
         System.out.println("Probando karger con...");
+        start = System.currentTimeMillis();
+        KargerAlgorithm kargerMinCut = new KargerAlgorithm(graph);
+        end = System.currentTimeMillis();
+        System.out.printf("tiempo creacion=%d...\n", end - start);
+        sb.append(end - start).append("\t");
+
         start = System.currentTimeMillis();
         kargerMinCut.kMinCut(k);
         end = System.currentTimeMillis();
         sb.append(end - start).append(System.lineSeparator());
-        System.out.printf("tiempo=%d...\n", end - start);
+        System.out.printf("tiempo corte =%d...\n", end - start);
         writeMinCut(deterministicMinCut.bestMinCut, name + "-karger");
 
+        // Mixed
         int delta_t = graph.getV()/10, t = graph.getV() - 1;
         int[] t_list = {t, t - 2*delta_t, t - 3*delta_t, t - 4*delta_t, t - 5*delta_t};
         for(int myt: t_list) {
-            graph3 = new Graph(graph);
-            MixedAlgorithm mixedMinCut = new MixedAlgorithm(graph3);
+            sb.append(myt).append("\t");
+            // graph3 = new Graph(graph);
             System.out.printf("Probando mezcla con t=%d...\n", myt);
+            start = System.currentTimeMillis();
+            MixedAlgorithm mixedMinCut = new MixedAlgorithm(graph);
+            end = System.currentTimeMillis();
+            System.out.printf("tiempo creacion=%d...\n", end - start);
+            sb.append(end - start).append("\t");
+
             start = System.currentTimeMillis();
             mixedMinCut.kMinCut(k, t);
             end = System.currentTimeMillis();
             sb.append(end - start).append("\t").append(myt).append(System.lineSeparator());
-            System.out.printf("tiempo=%d...\n", end - start);
+            System.out.printf("tiempo corte =%d...\n", end - start);
             writeMinCut(deterministicMinCut.bestMinCut, name + "-mixed-" + Integer.toString(myt));
         }
 
