@@ -157,7 +157,7 @@ public class KargerAlgorithm {
         bestMinCut.clear();
     }
 
-    void kMinCut(int k) {
+    public void kMinCut(int k) {
         int s = -1;
         ArrayList<Pair> lastBest = new ArrayList<>();
         for(int i=0; i<k; i++) {

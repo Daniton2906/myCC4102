@@ -2,6 +2,7 @@ package main;
 
 import edu.princeton.cs.algs4.EdgeWeightedGraph;
 import utils.DataManager;
+import utils.Graph;
 import utils.Tester;
 
 import java.io.File;
@@ -23,21 +24,12 @@ public class Main {
             System.exit(0);
         System.out.println("Iniciando testing...");
 
-        EdgeWeightedGraph graph = DataManager.getRandomGraph(N, 0.5);
-        /*PriorityQueue heapClasico = new HeapClasico(),
-                colaBinomial = new ColaBinomial(),
-                colaFibonacci = new ColaFibonacci(),
-                leftistHeap = new LeftistHeap(),
-                skewHeap = new SkewHeap();*/
-        //Tester.test0(heapClasico, dm, false);
-        //Tester.test0(colaBinomial, dm, false);
-        //Tester.test0(colaFibonacci, dm, false);
-        //Tester.test0(leftistHeap, dm, false);
-        //Tester.test0(skewHeap, dm, false)
+        // Tester.test0();
 
-        int N_TESTS = 100;
+        int N_TESTS = 1;
         for (int i = 0; i < N_TESTS; i++) {
             System.out.println("Holo");
+            Tester.testMinCut();
             /*
             Tester.sort_test(heapClasico, false, "heap-clasico");
             Tester.sort_test(colaBinomial, false, "cola-binomial");

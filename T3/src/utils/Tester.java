@@ -1,21 +1,17 @@
 package utils;
 
-// import apps.InsertAndMelding;
-// import apps.Sort;
-// import priority_queue.PriorityQueue;
+import min_cut.DeterministicAlgorithm;
+import min_cut.KargerAlgorithm;
+import min_cut.MixedAlgorithm;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 public class Tester {
 
-    private static final int MIN_EXP_SORT = 15; //15;
-    private static final int MAX_EXP_SORT = 21; //21;
-    private static final int MIN_EXP_INS_MEL = 0; //0
-    private static final int MAX_EXP_INS_MEL = 15; //15
-    private static final int MAX_EXP = 20; //20
+    private static final int MIN_EXP = 10;
+    private static final int MAX_EXP = 15;
 
-    static private File createFile(String abs_path, String filename) {
+    static private File getFile(String abs_path, String filename) {
         File dir = new File(abs_path);
         if(!dir.exists() && !dir.mkdir()) {
             System.out.println("Error al crear " + abs_path);
@@ -25,8 +21,10 @@ public class Tester {
         File fd = new File(dir, filename);
         // the rest of your code
         try {
-            if (fd.createNewFile()) {
-                System.out.println("created new fle");
+            if(fd.exists()) {
+                System.out.println("loading file");
+            } else if (fd.createNewFile()) {
+                System.out.println("created new file");
             } else {
                 System.out.println("could not create a new file");
             }
@@ -36,9 +34,136 @@ public class Tester {
         return fd;
     }
 
-    static public void test0(Graph graph) {
+    static public File saveGraph(Graph graph, String name) throws IOException {
+        String cp_filename = name + ".txt",
+                cp_absolute_path = new File("").getAbsolutePath() + "/T3/graphs/";
+        File fd = getFile(cp_absolute_path, cp_filename);
+        BufferedWriter writer = new BufferedWriter(new FileWriter(fd));
+
+        int V = graph.getV(), E = graph.getE();
+        StringBuilder sb = new StringBuilder();
+        sb.append(V).append("\t").append(E).append("\n");
+        for (int u = 0; u < V; u++) {
+            for (int v: graph.getNeighboorAdjL(u)) {
+                sb.append(v).append("\t");
+            }
+            sb.deleteCharAt(sb.length() - 1).append("\n");
+        }
+        writer.write(sb.toString());
+        writer.close();
+        return fd;
+    }
+
+    static public Graph loadGraph(String name) throws IOException {
+        String cp_filename = name + ".txt",
+                cp_absolute_path = new File("").getAbsolutePath() + "/T3/graphs/";
+        File fd = getFile(cp_absolute_path, cp_filename);
+
+        BufferedReader reader = new BufferedReader(new FileReader(fd));
+
+        String line = reader.readLine();
+        if(line == null)
+            return null;
+
+        String[] header = line.split("\t");
+
+        int V = Integer.parseInt(header[0]), E = Integer.parseInt(header[1]);
+        Graph graph = new Graph(V);
+        for (int u = 0; u < V; u++) {
+            for (String sv: reader.readLine().split("\t")) {
+                int v = Integer.parseInt(sv);
+                graph.addEdge(u, v, 1);
+            }
+        }
+        assert E == graph.getE();
+        return graph;
 
     }
+
+    static public void test0() throws IOException {
+        Graph graph = new Graph(5);
+        double p = 1.0/5;
+        double[] p_list = {p, p + 0.05, p + 0.1, p + 0.15, p + 0.2};
+        graph.randomConnectedGraph(p);
+        System.out.println(graph);
+        saveGraph(graph, "graph_test");
+        Graph new_graph = loadGraph("graph_test");
+        System.out.println(graph);
+    }
+
+    static public String test(Graph graph, int k) {
+        Graph graph1 = new Graph(graph),
+                graph2 = new Graph(graph),
+                graph3;
+
+        StringBuilder sb = new StringBuilder();
+
+        long start, end;
+        DeterministicAlgorithm deterministicMinCut = new DeterministicAlgorithm(graph1);
+        System.out.println("Probando determinista...");
+        start = System.currentTimeMillis();
+        deterministicMinCut.minCut();
+        end = System.currentTimeMillis();
+        sb.append(end - start).append(System.lineSeparator());
+        System.out.printf("tiempo=%d...\n", (end - start)/1000);
+
+        KargerAlgorithm kargerMinCut = new KargerAlgorithm(graph2);
+        System.out.println("Probando karger con...");
+        start = System.currentTimeMillis();
+        kargerMinCut.kMinCut(k);
+        end = System.currentTimeMillis();
+        sb.append(end - start).append(System.lineSeparator());
+        System.out.printf("tiempo=%d...\n", (end - start)/1000);
+
+        int delta_t = graph.getV()/10, t = graph.getV() - 1;
+        int[] t_list = {t, t - 2*delta_t, t - 3*delta_t, t - 4*delta_t, t - 5*delta_t};
+        for(int myt: t_list) {
+            graph3 = new Graph(graph);
+            MixedAlgorithm mixedMinCut = new MixedAlgorithm(graph3);
+            System.out.printf("Probando mezcla con t=%d...\n", myt);
+            start = System.currentTimeMillis();
+            mixedMinCut.kMinCut(k, t);
+            end = System.currentTimeMillis();
+            sb.append(end - start).append("\t").append(myt).append(System.lineSeparator());
+            System.out.printf("tiempo=%d...\n", (end - start)/1000);
+        }
+
+        return sb.toString();
+    }
+
+    static public void testP(int n, int k)  throws IOException {
+        String cp_filename = "minCut-" + n + "-" +System.currentTimeMillis() + ".tsv",
+                cp_absolute_path = new File("").getAbsolutePath() + "/T3/results/";
+
+        File fd = getFile(cp_absolute_path, cp_filename);
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(fd));
+
+        double p = 1.0/5;
+        double[] p_list = {p, p + 0.05, p + 0.1, p + 0.15, p + 0.2};
+        for(double myP: p_list){
+            String filename = "graph-" + n + "-" + myP;
+            Graph graph = loadGraph(filename);
+            if(graph == null) {
+                graph = new Graph(n);
+                graph.randomConnectedGraph(myP);
+                saveGraph(graph, filename);
+                // System.out.println(graph);
+            }
+            System.out.printf("V=%d E=%d...", graph.getV(), graph.getE());
+            writer.write(Double.toString(myP) + System.lineSeparator());
+            writer.write(test(graph, k));
+        }
+    }
+
+    static public void testMinCut() throws IOException {
+        for(int j = MIN_EXP; j <= MAX_EXP; j++)
+        {
+            int n = (int) Math.pow(2, j);
+            testP(n, 10);
+        }
+    }
+
 
     /*
     static public void test0(PriorityQueue c, DataManager dm, boolean debug) {
@@ -62,7 +187,7 @@ public class Tester {
         String cp_filename = name + "-sort-" + System.currentTimeMillis() + ".tsv",
             cp_absolute_path = new File("").getAbsolutePath() + "/T2/results/sort/";
 
-        File fd = createFile(cp_absolute_path, cp_filename);
+        File fd = getFile(cp_absolute_path, cp_filename);
 
         BufferedWriter writer = new BufferedWriter(new FileWriter(fd));
 
@@ -106,7 +231,7 @@ public class Tester {
         String cp_absolute_path = new File("").getAbsolutePath() + "/T2/results/ins_meld/",
                 cp_filename = name + "-ins_meld-" + System.currentTimeMillis() + ".tsv";
 
-        File fd = createFile(cp_absolute_path, cp_filename);
+        File fd = getFile(cp_absolute_path, cp_filename);
         BufferedWriter writer = new BufferedWriter(new FileWriter(fd));
 
         String header = "i\tn=2^" + MAX_EXP + "\tk=2^i\tinsert_time\tmelding_time" + System.lineSeparator();

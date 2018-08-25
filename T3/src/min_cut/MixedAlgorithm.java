@@ -92,8 +92,8 @@ public class MixedAlgorithm {
             auxG.addEdge(new_asign[u], new_asign[v]);
 
         }
-        System.out.println("\nDescripcion grafo comprimido");
-        System.out.println(auxG.toString());
+        // System.out.println("\nDescripcion grafo comprimido");
+        // System.out.println(auxG.toString());
 
         dt = new DeterministicAlgorithm(auxG);
         dt.minCut();

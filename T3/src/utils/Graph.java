@@ -1,6 +1,7 @@
 package utils;
 
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Stack;
 
 public class Graph {
@@ -8,6 +9,7 @@ public class Graph {
     private int V, E;
     // Matriz y lista de adyacencia.
     ArrayList<Integer>[] adjM, adjL;
+    private Random rand = new Random(29);
 
     public Graph(int n) {
         V = n;
@@ -54,7 +56,7 @@ public class Graph {
     public void randomGraph(double prob) {
         for(int i=0; i<V; i++) {
             for(int j=i+1; j<V; j++) {
-                double p = Math.random();
+                double p = rand.nextDouble();
 
                 if(p < prob && adjM[i].get(j) == 0) {
                     addEdge(i, j);
