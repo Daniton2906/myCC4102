@@ -106,9 +106,9 @@ public class Tester {
     }
 
     static private String test(Graph graph, int k, String name) throws IOException {
-        Graph graph1 = new Graph(graph),
+        /*Graph graph1 = new Graph(graph),
                 graph2 = new Graph(graph),
-                graph3;
+                graph3;*/
 
         StringBuilder sb = new StringBuilder();
 
