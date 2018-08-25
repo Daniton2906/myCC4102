@@ -1,10 +1,12 @@
 package utils;
 
+import edu.princeton.cs.algs4.In;
 import min_cut.DeterministicAlgorithm;
 import min_cut.KargerAlgorithm;
 import min_cut.MixedAlgorithm;
 
 import java.io.*;
+import java.util.ArrayList;
 
 public class Tester {
 
@@ -91,7 +93,19 @@ public class Tester {
         System.out.println(graph);
     }
 
-    static public String test(Graph graph, int k) {
+    static private void writeMinCut(ArrayList<Pair> bestMinCut, String name) throws IOException {
+        String cp_filename = name + ".txt",
+                cp_absolute_path = new File("").getAbsolutePath() + "/T3/results/";
+        File fd = getFile(cp_absolute_path, cp_filename);
+        BufferedWriter writer = new BufferedWriter(new FileWriter(fd));
+        writer.write(bestMinCut.size() + System.lineSeparator());
+        for(Pair p : bestMinCut) {
+            writer.write(p.getFirst() + "\t" + p.getSecond() + System.lineSeparator());
+        }
+        writer.close();
+    }
+
+    static private String test(Graph graph, int k, String name) throws IOException {
         Graph graph1 = new Graph(graph),
                 graph2 = new Graph(graph),
                 graph3;
@@ -104,8 +118,9 @@ public class Tester {
         start = System.currentTimeMillis();
         deterministicMinCut.minCut();
         end = System.currentTimeMillis();
-        sb.append(end - start).append(System.lineSeparator());
+        sb.append(deterministicMinCut.time_max_flow).append("\t").append(end - start).append(System.lineSeparator());
         System.out.printf("tiempo=%d...\n", (end - start)/1000);
+        writeMinCut(deterministicMinCut.bestMinCut, name + "-deterministic");
 
         KargerAlgorithm kargerMinCut = new KargerAlgorithm(graph2);
         System.out.println("Probando karger con...");
@@ -113,7 +128,8 @@ public class Tester {
         kargerMinCut.kMinCut(k);
         end = System.currentTimeMillis();
         sb.append(end - start).append(System.lineSeparator());
-        System.out.printf("tiempo=%d...\n", (end - start)/1000);
+        System.out.printf("tiempo=%d...\n", end - start);
+        writeMinCut(deterministicMinCut.bestMinCut, name + "-karger");
 
         int delta_t = graph.getV()/10, t = graph.getV() - 1;
         int[] t_list = {t, t - 2*delta_t, t - 3*delta_t, t - 4*delta_t, t - 5*delta_t};
@@ -125,17 +141,18 @@ public class Tester {
             mixedMinCut.kMinCut(k, t);
             end = System.currentTimeMillis();
             sb.append(end - start).append("\t").append(myt).append(System.lineSeparator());
-            System.out.printf("tiempo=%d...\n", (end - start)/1000);
+            System.out.printf("tiempo=%d...\n", end - start);
+            writeMinCut(deterministicMinCut.bestMinCut, name + "-mixed-" + Integer.toString(myt));
         }
 
         return sb.toString();
     }
 
-    static public void testP(int n, int k)  throws IOException {
-        String cp_filename = "minCut-" + n + "-" +System.currentTimeMillis() + ".tsv",
+    static private void testP(int n, int k)  throws IOException {
+        String cp_filename = "minCut-" + n + "-" + System.currentTimeMillis(),
                 cp_absolute_path = new File("").getAbsolutePath() + "/T3/results/";
 
-        File fd = getFile(cp_absolute_path, cp_filename);
+        File fd = getFile(cp_absolute_path, cp_filename + ".tsv");
 
         BufferedWriter writer = new BufferedWriter(new FileWriter(fd));
 
@@ -150,9 +167,9 @@ public class Tester {
                 saveGraph(graph, filename);
                 // System.out.println(graph);
             }
-            System.out.printf("V=%d E=%d...", graph.getV(), graph.getE());
+            System.out.printf("V=%d p=%f E=%d...\n", graph.getV(), myP, graph.getE());
             writer.write(Double.toString(myP) + System.lineSeparator());
-            writer.write(test(graph, k));
+            writer.write(test(graph, k, cp_filename + "-" + Double.toString(myP)));
         }
     }
 

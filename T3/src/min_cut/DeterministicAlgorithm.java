@@ -11,9 +11,9 @@ import java.util.Stack;
 public class DeterministicAlgorithm {
 
     Graph G, resG;
-    ArrayList<Pair> bestMinCut = new ArrayList<>();
+    public ArrayList<Pair> bestMinCut = new ArrayList<>();
     int bestMaxFlow = 0;
-    double time_max_flow = 0.0;
+    public double time_max_flow = 0.0;
 
     public DeterministicAlgorithm(Graph _G) {
         G = new Graph(_G);
