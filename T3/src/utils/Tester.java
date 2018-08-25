@@ -196,7 +196,7 @@ public class Tester {
         for(int j = MIN_EXP; j <= MAX_EXP; j++)
         {
             int n = (int) Math.pow(2, j);
-            testP(n, 5);
+            testP(n, 10);
         }
     }
 
