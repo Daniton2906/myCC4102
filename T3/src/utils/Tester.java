@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class Tester {
 
     private static final int MIN_EXP = 10;
-    private static final int MAX_EXP = 15;
+    private static final int MAX_EXP = 11;
 
     static private File getFile(String abs_path, String filename) {
         File dir = new File(abs_path);
@@ -142,7 +142,7 @@ public class Tester {
         end = System.currentTimeMillis();
         System.out.printf("tiempo corte =%d...\n", end - start);
         sb.append(end - start).append(System.lineSeparator());
-        writeMinCut(deterministicMinCut.bestMinCut, name + "-karger");
+        writeMinCut(kargerMinCut.bestMinCut, name + "-karger");
 
         // Mixed
         int delta_t = graph.getV()/10, t = 3;
@@ -161,7 +161,7 @@ public class Tester {
             end = System.currentTimeMillis();
             System.out.printf("tiempo corte =%d con t=%d...\n", end - start, myt);
             sb.append(end - start).append("\t").append(myt).append(System.lineSeparator());
-            writeMinCut(deterministicMinCut.bestMinCut, name + "-mixed-" + Integer.toString(myt));
+            writeMinCut(mixedMinCut.bestMinCut, name + "-mixed-" + Integer.toString(myt));
         }
 
         return sb.toString();
@@ -175,8 +175,8 @@ public class Tester {
 
         BufferedWriter writer = new BufferedWriter(new FileWriter(fd));
 
-        double p = 1.0/5;
-        double[] p_list = {p, p + 0.05, p + 0.1, p + 0.15, p + 0.2};
+        double p = 1.0/n, dp = 1.0/(2*n);
+        double[] p_list = {p, p + dp, p + 2*dp, p + 3*dp, p + 4*dp};
         for(double myP: p_list){
             String filename = "graph-" + n + "-" + myP;
             Graph graph = loadGraph(filename);
@@ -190,6 +190,7 @@ public class Tester {
             writer.write(Double.toString(myP) + System.lineSeparator());
             writer.write(test(graph, k, cp_filename + "-" + Double.toString(myP)));
         }
+        writer.close();
     }
 
     static public void testMinCut() throws IOException {

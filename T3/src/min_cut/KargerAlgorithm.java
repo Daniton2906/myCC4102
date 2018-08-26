@@ -49,7 +49,7 @@ public class KargerAlgorithm {
     Graph G, resG;
     UnionFind uf;
     int asignacion[];
-    ArrayList<Pair> bestMinCut = new ArrayList<>(), edgeList = new ArrayList<>();
+    public ArrayList<Pair> bestMinCut = new ArrayList<>(), edgeList = new ArrayList<>();
     int cant_edge;
 
     public KargerAlgorithm(Graph _G) {

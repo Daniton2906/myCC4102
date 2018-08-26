@@ -44,7 +44,7 @@ public class MixedAlgorithm {
     KargerAlgorithm kg;
     PairSort comp;
     Graph G, resG;
-    ArrayList<Pair> bestMinCut = new ArrayList<>();
+    public ArrayList<Pair> bestMinCut = new ArrayList<>();
 
     public MixedAlgorithm(Graph _G) {
         G = new Graph(_G);
